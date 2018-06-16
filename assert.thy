@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * SPDX-License-Identifier: BSD-2-Clause
+ * Dependencies: None
  ***********************************************************************************)
 
 chapter\<open>An Assertion Framework for Isabelle\<close>
