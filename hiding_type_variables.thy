@@ -41,7 +41,7 @@ text\<open>This theory implements a mechanism for declaring default type
      variables for data types. This comes handy for complex data types 
      with many type variables. The theory sets up both configurable print and 
      parse translations that allows for replacing @{emph \<open>all\<close>} type variables 
-     by @{text  \<open>_\<close>}, e.g., @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} becomes 
+     by @{text  \<open>__\<close>}, e.g., @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} becomes 
      @{text \<open>__ foo\<close>}. The use of this shorthand in output (printing) and input 
      (parsing) is, on a per-type basis, user-configurable.\<close>
 
@@ -53,7 +53,7 @@ signature HIDE_TVAR = sig
   datatype parse_mode = active | noparse 
   type hide_varT     = {
                          name: string,
-                         typ:  typ,
+                         tvars:  string list,
                          print_mode: print_mode,
                          parse_mode: parse_mode
                        } 
@@ -72,7 +72,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
   datatype parse_mode = active | noparse 
   type hide_varT     = {
                          name: string,
-                         typ:  typ,
+                         tvars:  string list,
                          print_mode: print_mode,
                          parse_mode: parse_mode
                        } 
@@ -102,8 +102,13 @@ structure Hide_Tvar : HIDE_TVAR = struct
     let   
       val ctx = Toplevel.context_of(Toplevel.theory_toplevel thy)
       val typ   = Syntax.read_typ ctx typ_str
-      val name = case typ of 
-                   Type(name,_) => name
+      val (name,tvars) = case typ of 
+                   Type(name,ts) => let
+                                      val tvars = map (fn (TFree(n,_)) => n 
+                                                         | _ => error("Unsupported type structure.")) ts
+                                    in 
+                                      (name,tvars)
+                                    end
                  | _ => error("Complex type not (yet) supported.")
       val print_m = case print_mode of 
                       SOME m => m
@@ -113,7 +118,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                     | NONE   => active
       val entry = {
                     name       = name,
-                    typ        = typ,
+                    tvars        = tvars,
                     print_mode = print_m,
                     parse_mode = parse_m
                   }
@@ -143,7 +148,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                           | NONE   => #parse_mode old_entry
             val entry = {
                           name       = name,
-                          typ        = typ,
+                          tvars      = #tvars old_entry,
                           print_mode = print_m,
                           parse_mode = parse_m
                         }
@@ -167,7 +172,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
         val fq_name = case mtyp of 
                      Type(s,_) => s
                     | _        => error("Complex type not (yet) supported.") 
-        val hide_type = Syntax.const("_ "^tname)  
+        val hide_type = Syntax.const("__ "^tname)  
 
         val reg_type = Term.list_comb(Const(tname,typ),terms)
       in
@@ -240,9 +245,38 @@ assert[string_of_thm_equal,
 update_default_tvars_mode "_ foobar" (always,noparse)
 
 assert[string_of_thm_equal,
-       thm_def="f_def", str="f (a::_ foobar) (b::_ foobar) = a"]
+       thm_def="f_def", str="f (a::__ foobar) (b::__ foobar) = a"]
 assert[string_of_thm_equal,
-       thm_def="g_def", str="g (a::_ foobar) (b::_ foobar) = a"]
+       thm_def="g_def", str="g (a::__ foobar) (b::__ foobar) = a"]
 
+subsection\<open>Parse Translation\<close>
+update_default_tvars_mode "_ foobar" (noprint,active)
+
+syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'_'_ _")
+parse_ast_translation\<open>
+  let
+    fun Lambda_ast_tr ctx (a::asts)= 
+        let 
+          val thy = Proof_Context.theory_of ctx
+          val decorated_name = case a of 
+                      Ast.Constant s => s 
+          val name = Lexicon.unmark_type decorated_name
+          val default_info = case Hide_Tvar.lookup thy name of 
+                                NONE   => error("No default type vars registered: "^name)
+                              | SOME e => e
+          val _ = if #parse_mode default_info = Hide_Tvar.noparse 
+                  then error("Default type vars disabled (option noparse): "^name)
+                  else ()
+          val type_vars = #tvars default_info
+          val type_vars_ast = map (fn n => Ast.Variable(n)) type_vars
+        in
+           Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
+        end   
+    in [(@{syntax_const "_tvars_wildcard"}, Lambda_ast_tr)] end;
+\<close>
+
+declare [[show_types]]
+definition B :: "'alpha \<Rightarrow> __ foobar"
+  where "B =  foo"
 
 end
