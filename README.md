@@ -14,6 +14,14 @@ older versions might be available on a dedicated branch.
   that provides a simple way for specifying assertions that Isabelle
   checks while processing a theory.
 
+* [hiding_type_variables.thy](hiding_type_variables.thy) provides
+  print a setup for defining default type variables of type
+  constructors. The default type variables can be hidden in output,
+  e.g., `('a, 'b, 'c) foo` is shown as `_ foo`. This shorthand
+  notation can also be used in input (using a parse translation),
+  which (sometimes) helps to focus on the important parts of complex
+  type declarations.
+
 ## Authors
 
 Main author: [Achim D. Brucker](http://www.brucker.ch/)
