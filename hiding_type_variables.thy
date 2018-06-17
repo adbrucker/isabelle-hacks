@@ -65,6 +65,7 @@ signature HIDE_TVAR = sig
                     theory -> theory
   val lookup      : theory -> string -> hide_varT option
   val hide_tvar_tr' : string -> Proof.context -> typ -> term list -> term 
+  val hide_tvar_ast_tr : Proof.context -> Ast.ast list -> Ast.ast
 end
 
 structure Hide_Tvar : HIDE_TVAR = struct
@@ -183,10 +184,35 @@ structure Hide_Tvar : HIDE_TVAR = struct
                     | default_only => hide_type (* TODO *)
                     | noprint      => reg_type 
       end
+  
+  fun hide_tvar_ast_tr ctx (a::_)= 
+      let 
+        val thy = Proof_Context.theory_of ctx
+        val decorated_name = case a of 
+                    Ast.Constant s => s
+                   |  _ => error("AST type not supported.") 
+        val name = Lexicon.unmark_type decorated_name
+        val default_info = case lookup thy name of 
+                              NONE   => error("No default type vars registered: "^name)
+                            | SOME e => e
+        val _ = if #parse_mode default_info = noparse 
+                then error("Default type vars disabled (option noparse): "^name)
+                else ()
+        val type_vars_ast = map (fn n => Ast.Variable(n)) (#tvars default_info)
+      in
+        Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
+      end   
+  | hide_tvar_ast_tr _ _ = error("Empty AST.")
 end
 \<close>
 
-section\<open>Registering Top-Level Isar Commands\<close>
+section\<open>Register Parse Translation\<close>
+syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'_'_ _")
+parse_ast_translation\<open>
+  [(@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr)]
+\<close>
+
+section\<open>Register Top-Level Isar Commands\<close>
 ML\<open>
   val modeP = (Parse.$$$ "("
        |-- (Parse.name --| Parse.$$$ ","
@@ -214,6 +240,11 @@ ML\<open>
 section\<open>Examples\<close>
 subsection\<open>Print Translation\<close>
 datatype ('alpha, 'beta) foobar = foo 'alpha | bar 'beta 
+
+typed_print_translation {* 
+    [(@{type_syntax foobar}, Hide_Tvar.hide_tvar_tr' "foobar")]
+*}
+
 type_synonym ('a, 'b, 'c, 'd) baz = "('a+'b, 'a \<times> 'b) foobar"
 
 definition f::"('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar" 
@@ -229,10 +260,6 @@ assert[string_of_thm_equal,
        str="g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
 
 register_default_tvars  "('alpha, 'beta) foobar" (always,active)
-
-typed_print_translation {* 
-    [(@{type_syntax foobar}, Hide_Tvar.hide_tvar_tr' "foobar")]
-*}
 
 update_default_tvars_mode "_ foobar" (noprint,noparse)
 assert[string_of_thm_equal,
@@ -251,29 +278,6 @@ assert[string_of_thm_equal,
 
 subsection\<open>Parse Translation\<close>
 update_default_tvars_mode "_ foobar" (noprint,active)
-
-syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'_'_ _")
-parse_ast_translation\<open>
-  let
-    fun Lambda_ast_tr ctx (a::asts)= 
-        let 
-          val thy = Proof_Context.theory_of ctx
-          val decorated_name = case a of 
-                      Ast.Constant s => s 
-          val name = Lexicon.unmark_type decorated_name
-          val default_info = case Hide_Tvar.lookup thy name of 
-                                NONE   => error("No default type vars registered: "^name)
-                              | SOME e => e
-          val _ = if #parse_mode default_info = Hide_Tvar.noparse 
-                  then error("Default type vars disabled (option noparse): "^name)
-                  else ()
-          val type_vars = #tvars default_info
-          val type_vars_ast = map (fn n => Ast.Variable(n)) type_vars
-        in
-           Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
-        end   
-    in [(@{syntax_const "_tvars_wildcard"}, Lambda_ast_tr)] end;
-\<close>
 
 declare [[show_types]]
 definition B :: "'alpha \<Rightarrow> __ foobar"
