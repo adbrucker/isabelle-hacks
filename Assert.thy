@@ -29,7 +29,7 @@
 
 chapter\<open>An Assertion Framework for Isabelle\<close>
 theory
-  "assert"
+  "Assert"
 imports 
   Main
 keywords

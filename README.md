@@ -10,11 +10,11 @@ older versions might be available on a dedicated branch.
 
 ## List of Isabelle Hacks
 
-* [assert.thy](assert.thy) provides a new top level command **assert**
+* [Assert.thy](Assert.thy) provides a new top level command **assert**
   that provides a simple way for specifying assertions that Isabelle
   checks while processing a theory.
 
-* [hiding_type_variables.thy](hiding_type_variables.thy) provides
+* [Hiding_Type_Variables.thy](Hiding_Type_Variables.thy) provides
   print a setup for defining default type variables of type
   constructors. The default type variables can be hidden in output,
   e.g., `('a, 'b, 'c) foo` is shown as `__ foo`. This shorthand

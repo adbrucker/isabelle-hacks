@@ -30,9 +30,9 @@
 
 chapter\<open>Using Print and Parse Translations for Hiding Type Variables\<close>
 theory
-  "hiding_type_variables"
+  "Hiding_Type_Variables"
 imports 
-  "assert" (* Can be replaced by Main, after removing all assertions. *)
+  "Assert" (* Can be replaced by Main, after removing all assertions. *)
 keywords
     "register_default_tvars"
     "update_default_tvars_mode"::thy_decl
