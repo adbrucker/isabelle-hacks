@@ -98,37 +98,6 @@ structure Hide_Tvar : HIDE_TVAR = struct
     | parse_parse_mode "noparse"      = noparse
     | parse_parse_mode s              = error("Parse mode not supported: "^s)
 
-
-  fun register typ_str print_mode parse_mode thy   =
-    let   
-      val ctx = Toplevel.context_of(Toplevel.theory_toplevel thy)
-      val typ   = Syntax.read_typ ctx typ_str
-      val (name,tvars) = case typ of 
-                   Type(name,ts) => let
-                                      val tvars = map (fn (TFree(n,_)) => n 
-                                                         | _ => error("Unsupported type structure.")) ts
-                                    in 
-                                      (name,tvars)
-                                    end
-                 | _ => error("Complex type not (yet) supported.")
-      val print_m = case print_mode of 
-                      SOME m => m
-                    | NONE   => always
-      val parse_m = case parse_mode of 
-                      SOME m => m
-                    | NONE   => active
-      val entry = {
-                    name       = name,
-                    tvars        = tvars,
-                    print_mode = print_m,
-                    parse_mode = parse_m
-                  }
-      fun reg tab = Symtab.update_new(name, entry) tab
-    in  
-     Context.theory_of ( (Data.map reg) (Context.Theory thy))
-     handle Symtab.DUP _ => error("Type shorthand already registered: "^name)
-    end
-
   fun update_mode typ_str print_mode parse_mode thy   =
     let       
       val ctx = Toplevel.context_of(Toplevel.theory_toplevel thy)
@@ -173,9 +142,10 @@ structure Hide_Tvar : HIDE_TVAR = struct
         val fq_name = case mtyp of 
                      Type(s,_) => s
                     | _        => error("Complex type not (yet) supported.") 
-        val hide_type = Syntax.const("__ "^tname)  
-
-        val reg_type = Term.list_comb(Const(tname,typ),terms)
+        val local_name_of = hd o rev o String.fields (fn c => c = #".")
+        val local_tname = local_name_of tname 
+        val hide_type = Syntax.const("__ "^(local_tname))  
+        val reg_type = Term.list_comb(Const(local_tname,typ),terms)
       in
         case lookup (Proof_Context.theory_of ctx) fq_name of 
           NONE   => reg_type
@@ -203,6 +173,40 @@ structure Hide_Tvar : HIDE_TVAR = struct
         Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
       end   
   | hide_tvar_ast_tr _ _ = error("Empty AST.")
+
+  fun register typ_str print_mode parse_mode thy   =
+    let   
+      val ctx = Toplevel.context_of(Toplevel.theory_toplevel thy)
+      val typ   = Syntax.read_typ ctx typ_str
+      val (name,tvars) = case typ of 
+                   Type(name,ts) => let
+                                      val tvars = map (fn (TFree(n,_)) => n 
+                                                         | _ => error("Unsupported type structure.")) ts
+                                    in 
+                                      (name,tvars)
+                                    end
+                 | _ => error("Complex type not (yet) supported.")
+      val print_m = case print_mode of 
+                      SOME m => m
+                    | NONE   => always
+      val parse_m = case parse_mode of 
+                      SOME m => m
+                    | NONE   => active
+      val entry = {
+                    name       = name,
+                    tvars        = tvars,
+                    print_mode = print_m,
+                    parse_mode = parse_m
+                  }
+      fun reg tab = Symtab.update_new(name, entry) tab
+      val thy =   Sign.typed_print_translation 
+                      [("\<^type>"^name, hide_tvar_tr' name)] thy
+
+    in  
+     Context.theory_of ( (Data.map reg) (Context.Theory thy))
+     handle Symtab.DUP _ => error("Type shorthand already registered: "^name)
+    end
+
 end
 \<close>
 
@@ -240,11 +244,6 @@ ML\<open>
 section\<open>Examples\<close>
 subsection\<open>Print Translation\<close>
 datatype ('alpha, 'beta) foobar = foo 'alpha | bar 'beta 
-
-typed_print_translation {* 
-    [(@{type_syntax foobar}, Hide_Tvar.hide_tvar_tr' "foobar")]
-*}
-
 type_synonym ('a, 'b, 'c, 'd) baz = "('a+'b, 'a \<times> 'b) foobar"
 
 definition f::"('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar" 
@@ -280,7 +279,10 @@ subsection\<open>Parse Translation\<close>
 update_default_tvars_mode "_ foobar" (noprint,active)
 
 declare [[show_types]]
-definition B :: "'alpha \<Rightarrow> __ foobar"
-  where "B =  foo"
+definition A :: "'alpha \<Rightarrow> __ foobar"
+  where "A =  foo"
+
+definition B :: "__ foobar \<Rightarrow> __ foobar \<Rightarrow> __ foobar" 
+  where "B x y = x"
 
 end
