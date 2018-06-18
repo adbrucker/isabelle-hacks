@@ -177,7 +177,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
   fun register typ_str print_mode parse_mode thy   =
     let   
       val ctx = Toplevel.context_of(Toplevel.theory_toplevel thy)
-      val typ   = Syntax.read_typ ctx typ_str
+      val typ   = Syntax.parse_typ ctx typ_str
       val (name,tvars) = case typ of 
                    Type(name,ts) => let
                                       val tvars = map (fn (TFree(n,_)) => n 
@@ -259,6 +259,7 @@ assert[string_of_thm_equal,
        str="g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
 
 register_default_tvars  "('alpha, 'beta) foobar" (always,active)
+register_default_tvars  "('alpha, 'beta, 'gamma, 'delta) baz" (always,active)
 
 update_default_tvars_mode "_ foobar" (noprint,noparse)
 assert[string_of_thm_equal,
@@ -284,5 +285,9 @@ definition A :: "'alpha \<Rightarrow> __ foobar"
 
 definition B :: "__ foobar \<Rightarrow> __ foobar \<Rightarrow> __ foobar" 
   where "B x y = x"
+
+definition C :: "__ baz \<Rightarrow> __ foobar \<Rightarrow> __ baz" 
+  where "C x y = x"
+
 
 end
