@@ -41,8 +41,8 @@ text\<open>This theory implements a mechanism for declaring default type
      variables for data types. This comes handy for complex data types 
      with many type variables. The theory sets up both configurable print and 
      parse translations that allows for replacing @{emph \<open>all\<close>} type variables 
-     by @{text  \<open>__\<close>}, e.g., @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} becomes 
-     @{text \<open>__ foo\<close>}. The use of this shorthand in output (printing) and input 
+     by @{text  \<open>(_)\<close>}, e.g., @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} becomes 
+     @{text \<open>(_) foo\<close>}. The use of this shorthand in output (printing) and input 
      (parsing) is, on a per-type basis, user-configurable.\<close>
 
 
@@ -53,7 +53,7 @@ signature HIDE_TVAR = sig
   datatype parse_mode = active | noparse 
   type hide_varT     = {
                          name: string,
-                         tvars:  string list,
+                         tvars:  typ list,
                          print_mode: print_mode,
                          parse_mode: parse_mode
                        } 
@@ -73,7 +73,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
   datatype parse_mode = active | noparse 
   type hide_varT     = {
                          name: string,
-                         tvars:  string list,
+                         tvars:  typ list,
                          print_mode: print_mode,
                          parse_mode: parse_mode
                        } 
@@ -144,7 +144,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                     | _        => error("Complex type not (yet) supported.") 
         val local_name_of = hd o rev o String.fields (fn c => c = #".")
         val local_tname = local_name_of tname 
-        val hide_type = Syntax.const("__ "^(local_tname))  
+        val hide_type = Syntax.const("(_) "^(local_tname))  
         val reg_type = Term.list_comb(Const(local_tname,typ),terms)
       in
         case lookup (Proof_Context.theory_of ctx) fq_name of 
@@ -168,7 +168,11 @@ structure Hide_Tvar : HIDE_TVAR = struct
         val _ = if #parse_mode default_info = noparse 
                 then error("Default type vars disabled (option noparse): "^name)
                 else ()
-        val type_vars_ast = map (fn n => Ast.Variable(n)) (#tvars default_info)
+        fun name_of_tvar tvar = case tvar of (TFree(n,_)) => n 
+                                | _ => error("Unsupported type structure.")
+        
+
+        val type_vars_ast = map (fn n => Ast.Variable(name_of_tvar n)) (#tvars default_info)
       in
         Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
       end   
@@ -178,14 +182,8 @@ structure Hide_Tvar : HIDE_TVAR = struct
     let   
       val ctx = Toplevel.context_of(Toplevel.theory_toplevel thy)
       val typ   = Syntax.parse_typ ctx typ_str
-      val (name,tvars) = case typ of 
-                   Type(name,ts) => let
-                                      val tvars = map (fn (TFree(n,_)) => n 
-                                                         | _ => error("Unsupported type structure.")) ts
-                                    in 
-                                      (name,tvars)
-                                    end
-                 | _ => error("Complex type not (yet) supported.")
+      val (name,tvars) = case typ  of Type(name,tvars) => (name,tvars)
+                             | _             => error("Unsupported type structure.")
       val print_m = case print_mode of 
                       SOME m => m
                     | NONE   => always
@@ -211,7 +209,7 @@ end
 \<close>
 
 section\<open>Register Parse Translation\<close>
-syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'_'_ _")
+syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _")
 parse_ast_translation\<open>
   [(@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr)]
 \<close>
@@ -272,21 +270,21 @@ assert[string_of_thm_equal,
 update_default_tvars_mode "_ foobar" (always,noparse)
 
 assert[string_of_thm_equal,
-       thm_def="f_def", str="f (a::__ foobar) (b::__ foobar) = a"]
+       thm_def="f_def", str="f (a::(_) foobar) (b::(_) foobar) = a"]
 assert[string_of_thm_equal,
-       thm_def="g_def", str="g (a::__ foobar) (b::__ foobar) = a"]
+       thm_def="g_def", str="g (a::(_) foobar) (b::(_) foobar) = a"]
 
 subsection\<open>Parse Translation\<close>
 update_default_tvars_mode "_ foobar" (noprint,active)
 
 declare [[show_types]]
-definition A :: "'alpha \<Rightarrow> __ foobar"
+definition A :: "'alpha \<Rightarrow> (_) foobar"
   where "A =  foo"
 
-definition B :: "__ foobar \<Rightarrow> __ foobar \<Rightarrow> __ foobar" 
+definition B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
   where "B x y = x"
 
-definition C :: "__ baz \<Rightarrow> __ foobar \<Rightarrow> __ baz" 
+definition C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz" 
   where "C x y = x"
 
 
