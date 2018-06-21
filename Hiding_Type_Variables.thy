@@ -54,7 +54,7 @@ signature HIDE_TVAR = sig
   type hide_varT     = {
                          name: string,
                          tvars:  typ list,
-                         typ_syn_tab : (string * typ list) Symtab.table, 
+                         typ_syn_tab : (string * typ list*string) Symtab.table, 
                          print_mode: print_mode,
                          parse_mode: parse_mode
                        } 
@@ -75,7 +75,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
   type hide_varT     = {
                          name: string,
                          tvars:  typ list,
-                         typ_syn_tab : (string * typ list) Symtab.table, 
+                         typ_syn_tab : (string * typ list*string) Symtab.table, 
                          print_mode: print_mode,
                          parse_mode: parse_mode
                        } 
@@ -177,8 +177,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
 
   fun key_of_type (Type(a, TS))      = mk_p (a^String.concat(map key_of_type TS))
     | key_of_type (TFree (vname, _)) = mk_p vname
-    | key_of_type (TVar (xi, _ ))    = error("TVar not supported in key_of_type: "^
-                                       (Term.string_of_vname xi))
+    | key_of_type (TVar (xi, _ ))    = mk_p (Term.string_of_vname xi)
   val key_of_type' = key_of_type o normalize_typvar_type'
 
 
@@ -216,7 +215,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                                  then Lexicon.unmark_type s
                                  else ""
     | key_of_term (Free(s,_))  = s
-    | key_of_term (Var(_,_))  = error("Var() not supported in key_of_term") 
+    | key_of_term (Var(xi,_))  = Term.string_of_vname xi 
     | key_of_term (Bound(_))   = error("Bound() not supported in key_of_term")
     | key_of_term (Abs(_,_,_)) = error("Abs() not supported in key_of_term")
     | key_of_term (t1$t2)      = (key_of_term t1)^(key_of_term t2)
@@ -229,7 +228,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
 
         val mtyp   = Syntax.parse_typ ctx tname (* no type checking *) 
 
-        val (fq_name,_) = case mtyp of
+        val (fq_name, _) = case mtyp of
                      Type(s,ts) => (s,ts)
                     | _        => error("Complex type not (yet) supported.") 
 
@@ -239,19 +238,23 @@ structure Hide_Tvar : HIDE_TVAR = struct
  
         val reg_type_as_term = Term.list_comb(Const(Lexicon.mark_type tname,dummyT),terms)
         val key = key_of_term' reg_type_as_term
+        val actual_tvars_key = key_of_term reg_type_as_term
 
       in
         case lookup (Proof_Context.theory_of ctx) fq_name of 
           NONE   => raise Match
         | SOME e => let
-                      val tname = case Symtab.lookup (#typ_syn_tab e) key  of
-                                  NONE       => local_name_of tname
-                                | SOME (s,_) => local_name_of s
+                      val (tname,default_tvars_key) = 
+                              case Symtab.lookup (#typ_syn_tab e) key  of
+                                  NONE       => (local_name_of tname, "")
+                                | SOME (s,_,tv) => (local_name_of s,tv)
                     in 
                     case (#print_mode e) of
-                      print_all       => hide_type tname
-                    | print => hide_type tname (* TODO *)
-                    | noprint      => raise Match
+                      print_all  => hide_type tname
+                    | print      => if default_tvars_key=actual_tvars_key
+                                    then hide_type tname
+                                    else raise Match
+                    | noprint    => raise Match
                    end  
       end
   
@@ -290,6 +293,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                              | _             => error("Unsupported type structure.")
 
       val base_key = key_of_type' base_typ
+      val base_tvar_key = key_of_type base_typ
 
       val print_m = case print_mode of 
                       SOME m => m
@@ -300,7 +304,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
       val entry = {
                     name       = name,
                     tvars        = tvars,
-                    typ_syn_tab = Symtab.empty:((string * typ list) Symtab.table),
+                    typ_syn_tab = Symtab.empty:((string * typ list * string) Symtab.table),
                     print_mode = print_m,
                     parse_mode = parse_m
                   }
@@ -310,7 +314,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                          {
                            name       = "",
                            tvars        = [],
-                           typ_syn_tab = Symtab.empty:((string * typ list) Symtab.table),
+                           typ_syn_tab = Symtab.empty:((string * typ list * string) Symtab.table),
                            print_mode = noprint,
                            parse_mode = noparse
                          }
@@ -322,7 +326,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
       val base_entry = {
                     name       = #name base_entry,
                     tvars        = #tvars base_entry,
-                    typ_syn_tab = Symtab.update (base_key, (name, base_tvars))
+                    typ_syn_tab = Symtab.update (base_key, (name, base_tvars, base_tvar_key))
                                                 (#typ_syn_tab (base_entry)), 
                     print_mode = #print_mode base_entry,
                     parse_mode = #parse_mode base_entry
@@ -416,6 +420,9 @@ assert[string_of_thm_equal,
 
 subsection\<open>Parse Translation\<close>
 update_default_tvars_mode "_ foobar" (print_all,parse)
+
+declare [[show_types]]
+thm f_def
 
 declare [[show_types]]
 definition A :: "'alpha \<Rightarrow> (_) foobar"
