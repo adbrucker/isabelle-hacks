@@ -49,8 +49,8 @@ text\<open>This theory implements a mechanism for declaring default type
 section\<open>Theory Managed Data Structure\<close>
 ML\<open>
 signature HIDE_TVAR = sig
-  datatype print_mode = always | default_only | noprint
-  datatype parse_mode = active | noparse 
+  datatype print_mode = print_all | print | noprint
+  datatype parse_mode = parse | noparse 
   type hide_varT     = {
                          name: string,
                          tvars:  typ list,
@@ -70,8 +70,8 @@ signature HIDE_TVAR = sig
 end
 
 structure Hide_Tvar : HIDE_TVAR = struct
-  datatype print_mode = always | default_only | noprint
-  datatype parse_mode = active | noparse 
+  datatype print_mode = print_all | print | noprint
+  datatype parse_mode = parse | noparse 
   type hide_varT     = {
                          name: string,
                          tvars:  typ list,
@@ -92,14 +92,14 @@ structure Hide_Tvar : HIDE_TVAR = struct
   );
 
 
-  fun parse_print_mode "always"       = always
-    | parse_print_mode "default_only" = default_only
-    | parse_print_mode "noprint"      = noprint
-    | parse_print_mode s              = error("Print mode not supported: "^s)
+  fun parse_print_mode "print_all" = print_all
+    | parse_print_mode "print"     = print
+    | parse_print_mode "noprint"   = noprint
+    | parse_print_mode s           = error("Print mode not supported: "^s)
  
-  fun parse_parse_mode "active"       = active
-    | parse_parse_mode "noparse"      = noparse
-    | parse_parse_mode s              = error("Parse mode not supported: "^s)
+  fun parse_parse_mode "parse"     = parse
+    | parse_parse_mode "noparse"   = noparse
+    | parse_parse_mode s           = error("Parse mode not supported: "^s)
 
   fun update_mode typ_str print_mode parse_mode thy   =
     let       
@@ -249,8 +249,8 @@ structure Hide_Tvar : HIDE_TVAR = struct
                                 | SOME (s,_) => local_name_of s
                     in 
                     case (#print_mode e) of
-                      always       => hide_type tname
-                    | default_only => hide_type tname (* TODO *)
+                      print_all       => hide_type tname
+                    | print => hide_type tname (* TODO *)
                     | noprint      => raise Match
                    end  
       end
@@ -293,10 +293,10 @@ structure Hide_Tvar : HIDE_TVAR = struct
 
       val print_m = case print_mode of 
                       SOME m => m
-                    | NONE   => always
+                    | NONE   => print_all
       val parse_m = case parse_mode of 
                       SOME m => m
-                    | NONE   => active
+                    | NONE   => parse
       val entry = {
                     name       = name,
                     tvars        = tvars,
@@ -360,7 +360,7 @@ ML\<open>
        |-- (Parse.name --| Parse.$$$ ","
          -- Parse.name --| 
             Parse.$$$ ")"))
-  val typ_modeP = Parse.typ -- (Scan.optional modeP ("always","active"))
+  val typ_modeP = Parse.typ -- (Scan.optional modeP ("print_all","parse"))
 
   val _ = Outer_Syntax.command @{command_keyword "register_default_tvars"}
           "Register default variables (and hiding mechanims) for a type."
@@ -396,8 +396,8 @@ assert[string_of_thm_equal,
        thm_def="g_def", 
        str="g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
 
-register_default_tvars  "('alpha, 'beta) foobar" (always,active)
-register_default_tvars  "('alpha, 'beta, 'gamma, 'delta) baz" (always,active)
+register_default_tvars  "('alpha, 'beta) foobar" (print_all,parse)
+register_default_tvars  "('alpha, 'beta, 'gamma, 'delta) baz" (print_all,parse)
 
 update_default_tvars_mode "_ foobar" (noprint,noparse)
 assert[string_of_thm_equal,
@@ -407,7 +407,7 @@ assert[string_of_thm_equal,
        thm_def="g_def", 
        str="g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
 
-update_default_tvars_mode "_ foobar" (always,noparse)
+update_default_tvars_mode "_ foobar" (print_all,noparse)
 
 assert[string_of_thm_equal,
        thm_def="f_def", str="f (a::(_) foobar) (b::(_) foobar) = a"]
@@ -415,7 +415,7 @@ assert[string_of_thm_equal,
        thm_def="g_def", str="g (a::(_) baz) (b::(_) baz) = a"]
 
 subsection\<open>Parse Translation\<close>
-update_default_tvars_mode "_ foobar" (noprint,active)
+update_default_tvars_mode "_ foobar" (print_all,parse)
 
 declare [[show_types]]
 definition A :: "'alpha \<Rightarrow> (_) foobar"
