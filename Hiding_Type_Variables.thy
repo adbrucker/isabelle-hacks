@@ -50,6 +50,7 @@ section\<open>Theory Managed Data Structure\<close>
 ML\<open>
 signature HIDE_TVAR = sig
   datatype print_mode = print_all | print | noprint
+  datatype tvar_subst = right | left
   datatype parse_mode = parse | noparse 
   type hide_varT     = {
                          name: string,
@@ -67,10 +68,13 @@ signature HIDE_TVAR = sig
   val lookup      : theory -> string -> hide_varT option
   val hide_tvar_tr' : string -> Proof.context -> term list -> term 
   val hide_tvar_ast_tr : Proof.context -> Ast.ast list -> Ast.ast
+  val hide_tvar_subst_ast_tr : tvar_subst -> Proof.context -> Ast.ast list -> Ast.ast
+
 end
 
 structure Hide_Tvar : HIDE_TVAR = struct
   datatype print_mode = print_all | print | noprint
+  datatype tvar_subst = right | left
   datatype parse_mode = parse | noparse 
   type hide_varT     = {
                          name: string,
@@ -349,28 +353,17 @@ structure Hide_Tvar : HIDE_TVAR = struct
      handle Symtab.DUP _ => error("Type shorthand already registered: "^name)
     end
 
-end
-\<close>
-
-section\<open>Register Parse Translation\<close>
-syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _")
-syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
-syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ .'_")
-
-ML{*
-datatype tvar_subst = right | left
-
-fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) = 
+  fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) = 
       let 
         val thy = Proof_Context.theory_of ctx
         val (decorated_name, args) = case ast
                of (Ast.Appl ((Ast.Constant s)::args)) => (s, args)
                 | _ =>  error "Error in obtaining type constructor."
         val name = Lexicon.unmark_type decorated_name
-        val default_info = case Hide_Tvar.lookup thy name of
+        val default_info = case lookup thy name of
                               NONE   => error("No default type vars registered: "^name)
                             | SOME e => e
-        val _ = if #parse_mode default_info = Hide_Tvar.noparse 
+        val _ = if #parse_mode default_info = noparse 
                 then error("Default type vars disabled (option noparse): "^name)
                 else ()
         fun name_of_tvar tvar = case tvar of (TFree(n,_)) => n 
@@ -382,14 +375,21 @@ fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) =
       in
         Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
       end   
-  | hide_tvar_subst_ast_tr _ _ _ = error("hide_tvar_subst_ast_tr: empty AST.")
-*}
+    | hide_tvar_subst_ast_tr _ _ _ = error("hide_tvar_subst_ast_tr: empty AST.")
+
+end
+\<close>
+
+section\<open>Register Parse Translation\<close>
+syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _")
+syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
+syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ .'_")
 
 parse_ast_translation\<open>
   [
     (@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr),
-    (@{syntax_const "_tvars_wildcard_right"}, hide_tvar_subst_ast_tr right),
-    (@{syntax_const "_tvars_wildcard_left"}, hide_tvar_subst_ast_tr left)
+    (@{syntax_const "_tvars_wildcard_right"}, Hide_Tvar.hide_tvar_subst_ast_tr Hide_Tvar.right),
+    (@{syntax_const "_tvars_wildcard_left"}, Hide_Tvar.hide_tvar_subst_ast_tr Hide_Tvar.left)
   ]
 \<close>
 
@@ -472,6 +472,7 @@ definition B' :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar"
 assert[string_of_thm_equal,
        thm_def="A'_def", str="A' (x::'x) = foo x"]
 
+
 definition B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
   where "B x y = x"
 assert[string_of_thm_equal,
@@ -481,6 +482,5 @@ definition C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz"
   where "C x y = x"
 assert[string_of_thm_equal,
        thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
-
 
 end
