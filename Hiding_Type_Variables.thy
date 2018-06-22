@@ -279,7 +279,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
       in
         Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
       end   
-  | hide_tvar_ast_tr _ _ = error("Empty AST.")
+  | hide_tvar_ast_tr _ _ = error("hide_tvar_ast_tr: empty AST.")
 
   fun register typ_str print_mode parse_mode thy   =
     let   
@@ -354,8 +354,46 @@ end
 
 section\<open>Register Parse Translation\<close>
 syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _")
+syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
+syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ .'_")
+
+ML{*
+datatype tvar_subst = right | left
+
+fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) = 
+      let 
+        val thy = Proof_Context.theory_of ctx
+        fun string_of_ast (Ast.Constant s) = "(C"^s^")"
+            | string_of_ast (Ast.Variable s) = "(V"^s^")"
+            | string_of_ast (Ast.Appl ast) = String.concat (map string_of_ast ast)
+        val (decorated_name, args) = case ast
+               of (Ast.Appl ((Ast.Constant s)::args)) => (s, args)
+                | _ =>  error "Error in obtaining type constructor."
+        val name = Lexicon.unmark_type decorated_name
+        val default_info = case Hide_Tvar.lookup thy name of
+                              NONE   => error("No default type vars registered: "^name)
+                            | SOME e => e
+        val _ = if #parse_mode default_info = Hide_Tvar.noparse 
+                then error("Default type vars disabled (option noparse): "^name)
+                else ()
+        fun name_of_tvar tvar = case tvar of (TFree(n,_)) => n 
+                                | _ => error("Unsupported type structure.")
+        val type_vars_ast = map (fn n => Ast.Variable(name_of_tvar n)) (#tvars default_info)
+        val type_vars_ast =  case hole of 
+                right => List.drop(List.rev type_vars_ast, List.length args)@args
+              | left  => args@List.drop(type_vars_ast, List.length args)
+      in
+        Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
+      end   
+  | hide_tvar_subst_ast_tr _ _ _ = error("hide_tvar_subst_ast_tr: empty AST.")
+*}
+
 parse_ast_translation\<open>
-  [(@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr)]
+  [
+    (@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr),
+    (@{syntax_const "_tvars_wildcard_right"}, hide_tvar_subst_ast_tr right),
+    (@{syntax_const "_tvars_wildcard_left"}, hide_tvar_subst_ast_tr left)
+  ]
 \<close>
 
 section\<open>Register Top-Level Isar Commands\<close>
@@ -419,14 +457,22 @@ assert[string_of_thm_equal,
        thm_def="g_def", str="g (a::(_) baz) (b::(_) baz) = a"]
 
 subsection\<open>Parse Translation\<close>
-update_default_tvars_mode "_ foobar" (print_all,parse)
+update_default_tvars_mode "_ foobar" (print,parse)
 
 declare [[show_types]]
 thm f_def
 
+ML {* Ast.Appl *}
 declare [[show_types]]
-definition A :: "'alpha \<Rightarrow> (_) foobar"
+definition A :: "'x \<Rightarrow> (('x::linorder) foobar) ._"
   where "A =  foo"
+
+definition A' :: "'x \<Rightarrow> (('x,'b) foobar) ._"
+  where "A' =  foo"
+
+definition B' :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
+  where "B' x y = x"
+
 
 definition B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
   where "B x y = x"
