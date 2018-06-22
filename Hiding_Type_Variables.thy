@@ -454,28 +454,33 @@ assert[string_of_thm_equal,
        thm_def="g_def", str="g (a::(_) baz) (b::(_) baz) = a"]
 
 subsection\<open>Parse Translation\<close>
-update_default_tvars_mode "_ foobar" (print,parse)
+update_default_tvars_mode "_ foobar" (print_all,parse)
 
-declare [[show_types]]
-thm f_def
-
-ML {* Ast.Appl *}
 declare [[show_types]]
 definition A :: "'x \<Rightarrow> (('x::linorder) foobar) ._"
-  where "A =  foo"
+  where "A x = foo x"
+assert[string_of_thm_equal,
+       thm_def="A_def", str="A (x::'x) = foo x"]
 
 definition A' :: "'x \<Rightarrow> (('x,'b) foobar) ._"
-  where "A' =  foo"
+  where "A' x = foo x"
+assert[string_of_thm_equal,
+       thm_def="A'_def", str="A' (x::'x) = foo x"]
 
 definition B' :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
   where "B' x y = x"
-
+assert[string_of_thm_equal,
+       thm_def="A'_def", str="A' (x::'x) = foo x"]
 
 definition B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
   where "B x y = x"
+assert[string_of_thm_equal,
+       thm_def="B_def", str="B (x::(_) foobar) (y::(_) foobar) = x"]
 
 definition C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz" 
   where "C x y = x"
+assert[string_of_thm_equal,
+       thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
 
 
 end
