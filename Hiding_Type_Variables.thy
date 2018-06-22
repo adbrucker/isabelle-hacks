@@ -363,9 +363,6 @@ datatype tvar_subst = right | left
 fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) = 
       let 
         val thy = Proof_Context.theory_of ctx
-        fun string_of_ast (Ast.Constant s) = "(C"^s^")"
-            | string_of_ast (Ast.Variable s) = "(V"^s^")"
-            | string_of_ast (Ast.Appl ast) = String.concat (map string_of_ast ast)
         val (decorated_name, args) = case ast
                of (Ast.Appl ((Ast.Constant s)::args)) => (s, args)
                 | _ =>  error "Error in obtaining type constructor."
