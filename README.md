@@ -35,5 +35,5 @@ SPDX-License-Identifier: BSD-2-Clause
 ## Master Repository
 
 The master git repository for this project is hosted by the [Software
-Assurance & Security Research Team](https://logicalhacking.com):
-[https://git.logicalhacking.com/adbrucker/isabelle-hacks]
+Assurance & Security Research Team](https://logicalhacking.com) at
+https://git.logicalhacking.com/adbrucker/isabelle-hacks
