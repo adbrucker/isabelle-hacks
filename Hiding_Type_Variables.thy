@@ -38,16 +38,29 @@ keywords
     "register_default_tvars"
     "update_default_tvars_mode"::thy_decl
 begin
-text\<open>This theory implements a mechanism for declaring default type 
-     variables for data types. This comes handy for complex data types 
-     with many type variables. The theory sets up both configurable print and 
-     parse translations that allows for replacing @{emph \<open>all\<close>} type variables 
-     by @{text  \<open>(_)\<close>}, e.g., @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} becomes 
-     @{text \<open>(_) foo\<close>}. The use of this shorthand in output (printing) and input 
-     (parsing) is, on a per-type basis, user-configurable.\<close>
+text\<open>
+  This theory implements a mechanism for declaring default type variables for 
+  data types. This comes handy for complex data types with many type variables. 
+  The theory sets up both configurable print and parse translations that allows 
+  for replacing @{emph \<open>all\<close>} type variables by @{text  \<open>(_)\<close>}, e.g., a five-ary 
+  constructor @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} can be shorted to 
+  @{text \<open>(_) foo\<close>}. The use of this shorthand in output (printing) and input 
+  (parsing) is, on a per-type basis, user-configurable using the top-level 
+  commands @{text \<open>register_default_tvars\<close>} (for registering the names of the 
+  default type variables and the print/parse mode) and  
+  @{text \<open>update_default_tvars_mode\<close>} (for changing the print/parse mode 
+  dynamically).  
 
+  The input also supports short-hands for declaring default sorts (e.g., 
+  @{text \<open>(_::linorder)\<close>} specifies that all default variables need to be 
+  instances of the sort (type class) @{class \<open>linorder\<close>} and short-hands
+  of overriding a suffice (or prefix) of the default type variables. For 
+  example, @{text \<open>('state) foo _.\<close>} is a short-hand for 
+  @{text \<open>('a, 'b, 'c, 'd, 'state) foo\<close>}.
+}\<close>
 
-section\<open>Theory Managed Data Structure\<close>
+section\<open>Implementation\<close>
+subsection\<open>Theory Managed Data Structure\<close>
 ML\<open>
 signature HIDE_TVAR = sig
   datatype print_mode = print_all | print | noprint
@@ -394,7 +407,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
 end
 \<close>
 
-section\<open>Register Parse Translation\<close>
+subsection\<open>Register Parse Translations\<close>
 syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _") 
 syntax "_tvars_wildcard_sort" :: "sort \<Rightarrow> type \<Rightarrow> type" ("'('_::_') _")
 syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
@@ -409,7 +422,7 @@ parse_ast_translation\<open>
   ]
 \<close>
 
-section\<open>Register Top-Level Isar Commands\<close>
+subsection\<open>Register Top-Level Isar Commands\<close>
 ML\<open>
   val modeP = (Parse.$$$ "("
        |-- (Parse.name --| Parse.$$$ ","
