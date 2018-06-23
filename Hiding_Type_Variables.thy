@@ -263,12 +263,17 @@ structure Hide_Tvar : HIDE_TVAR = struct
                    end  
       end
   
-  fun hide_tvar_ast_tr ctx (a::_)= 
+  fun hide_tvar_ast_tr ctx ast= 
       let 
         val thy = Proof_Context.theory_of ctx
-        val decorated_name = case a of 
-                    Ast.Constant s => s
-                   |  _ => error("AST type not supported.") 
+
+        fun parse_ast ((Ast.Constant const)::[]) = (const,NONE)
+          | parse_ast ((Ast.Constant sort)::(Ast.Constant const)::[]) 
+                                      = (const,SOME sort)  
+          |  parse_ast _ = error("AST type not supported.") 
+
+        val (decorated_name, decorated_sort) = parse_ast ast 
+
         val name = Lexicon.unmark_type decorated_name
         val default_info = case lookup thy name of 
                               NONE   => error("No default type vars registered: "^name)
@@ -278,13 +283,19 @@ structure Hide_Tvar : HIDE_TVAR = struct
                 else ()
         fun name_of_tvar tvar = case tvar of (TFree(n,_)) => n 
                                 | _ => error("Unsupported type structure.")
-        
-
-        val type_vars_ast = map (fn n => Ast.Variable(name_of_tvar n)) (#tvars default_info)
+        val type_vars_ast = 
+            let fun mk_tvar n = 
+               case decorated_sort of 
+                  NONE      => Ast.Variable(name_of_tvar n)
+                | SOME sort =>  Ast.Appl([Ast.Constant("_ofsort"),
+                                               Ast.Variable(name_of_tvar n),
+                                                   Ast.Constant(sort)])
+            in
+              map mk_tvar (#tvars default_info)
+            end
       in
         Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
       end   
-  | hide_tvar_ast_tr _ _ = error("hide_tvar_ast_tr: empty AST.")
 
   fun register typ_str print_mode parse_mode thy   =
     let   
@@ -356,10 +367,12 @@ structure Hide_Tvar : HIDE_TVAR = struct
 
   fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) = 
       let 
+
         val thy = Proof_Context.theory_of ctx
         val (decorated_name, args) = case ast
                of (Ast.Appl ((Ast.Constant s)::args)) => (s, args)
                 | _ =>  error "Error in obtaining type constructor."
+
         val name = Lexicon.unmark_type decorated_name
         val default_info = case lookup thy name of
                               NONE   => error("No default type vars registered: "^name)
@@ -382,12 +395,14 @@ end
 \<close>
 
 section\<open>Register Parse Translation\<close>
-syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _")
+syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _") 
+syntax "_tvars_wildcard_sort" :: "sort \<Rightarrow> type \<Rightarrow> type" ("'('_::_') _")
 syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
 syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ .'_")
 
 parse_ast_translation\<open>
   [
+    (@{syntax_const "_tvars_wildcard_sort"}, Hide_Tvar.hide_tvar_ast_tr),
     (@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr),
     (@{syntax_const "_tvars_wildcard_right"}, Hide_Tvar.hide_tvar_subst_ast_tr Hide_Tvar.right),
     (@{syntax_const "_tvars_wildcard_left"}, Hide_Tvar.hide_tvar_subst_ast_tr Hide_Tvar.left)
@@ -483,5 +498,11 @@ definition C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz"
   where "C x y = x"
 assert[string_of_thm_equal,
        thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
+
+definition E :: "(_::linorder) baz \<Rightarrow> (_::linorder) foobar \<Rightarrow> (_::linorder) baz" 
+  where "E x y = x"
+assert[string_of_thm_equal,
+       thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
+
 
 end
