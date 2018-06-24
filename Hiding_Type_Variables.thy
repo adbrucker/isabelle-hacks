@@ -101,14 +101,14 @@ structure Hide_Tvar : HIDE_TVAR = struct
                        } 
   type hide_tvar_tab = (hide_varT) Symtab.table
   fun hide_tvar_eq (a, a') = (#name a) = (#name a')
-  fun merge_assert_tab (tab,tab') = Symtab.merge hide_tvar_eq (tab,tab')
+  fun merge_tvar_tab (tab,tab') = Symtab.merge hide_tvar_eq (tab,tab')
 
   structure Data = Generic_Data
   (
     type T = hide_tvar_tab
     val empty  = Symtab.empty:hide_tvar_tab
     val extend = I
-    fun merge(t1,t2)  = merge_assert_tab (t1, t2)
+    fun merge(t1,t2)  = merge_tvar_tab (t1, t2)
   );
 
 
