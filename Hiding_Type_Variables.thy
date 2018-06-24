@@ -82,8 +82,10 @@ signature HIDE_TVAR = sig
   val lookup      : theory -> string -> hide_varT option
   val hide_tvar_tr' : string -> Proof.context -> term list -> term 
   val hide_tvar_ast_tr : Proof.context -> Ast.ast list -> Ast.ast
-  val hide_tvar_subst_ast_tr : tvar_subst -> Proof.context -> Ast.ast list -> Ast.ast
-
+  val hide_tvar_subst_ast_tr : tvar_subst -> Proof.context -> Ast.ast list 
+                               -> Ast.ast
+  val hide_tvar_subst_return_ast_tr : tvar_subst -> Proof.context 
+                               -> Ast.ast list -> Ast.ast
 end
 
 structure Hide_Tvar : HIDE_TVAR = struct
@@ -378,7 +380,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
      handle Symtab.DUP _ => error("Type shorthand already registered: "^name)
     end
 
-  fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) = 
+  fun  hide_tvar_subst_ast_tr hole ctx (ast::[]) =
       let 
 
         val thy = Proof_Context.theory_of ctx
@@ -404,11 +406,20 @@ structure Hide_Tvar : HIDE_TVAR = struct
       end   
     | hide_tvar_subst_ast_tr _ _ _ = error("hide_tvar_subst_ast_tr: empty AST.")
 
+  fun hide_tvar_subst_return_ast_tr hole ctx (retval::constructor::[]) = 
+         hide_tvar_subst_ast_tr hole ctx [Ast.Appl (constructor::retval::[])]
+    | hide_tvar_subst_return_ast_tr _ _ _ = 
+           error("hide_tvar_subst_return_ast_tr: error in parsing AST")
+
+
 end
 \<close>
 
+
+
 subsection\<open>Register Parse Translations\<close>
 syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _") 
+syntax "_tvars_wildcard_retval" :: "type \<Rightarrow> type \<Rightarrow> type" ("'('_, _') _")
 syntax "_tvars_wildcard_sort" :: "sort \<Rightarrow> type \<Rightarrow> type" ("'('_::_') _")
 syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
 syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ .'_")
@@ -417,6 +428,7 @@ parse_ast_translation\<open>
   [
     (@{syntax_const "_tvars_wildcard_sort"}, Hide_Tvar.hide_tvar_ast_tr),
     (@{syntax_const "_tvars_wildcard"}, Hide_Tvar.hide_tvar_ast_tr),
+    (@{syntax_const "_tvars_wildcard_retval"}, Hide_Tvar.hide_tvar_subst_return_ast_tr Hide_Tvar.right),
     (@{syntax_const "_tvars_wildcard_right"}, Hide_Tvar.hide_tvar_subst_ast_tr Hide_Tvar.right),
     (@{syntax_const "_tvars_wildcard_left"}, Hide_Tvar.hide_tvar_subst_ast_tr Hide_Tvar.left)
   ]
@@ -517,5 +529,9 @@ definition E :: "(_::linorder) baz \<Rightarrow> (_::linorder) foobar \<Rightarr
 assert[string_of_thm_equal,
        thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
 
+definition X :: "(_, 'retval::linorder) baz 
+                 \<Rightarrow> (_,'retval) foobar 
+                 \<Rightarrow> (_,'retval) baz"
+  where "X x y = x"
 
 end
