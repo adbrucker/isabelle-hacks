@@ -464,74 +464,74 @@ subsection\<open>Print Translation\<close>
 datatype ('a, 'b) foobar = foo 'a | bar 'b 
 type_synonym ('a, 'b, 'c, 'd) baz = "('a+'b, 'a \<times> 'b) foobar"
 
-definition f::"('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar" 
-     where "f a b = a"
-definition g::"('a, 'b, 'c, 'd) baz \<Rightarrow> ('a, 'b, 'c, 'd) baz \<Rightarrow> ('a, 'b, 'c, 'd) baz" 
-     where "g a b = a"
+definition hide_tvar_f::"('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar" 
+     where "hide_tvar_f a b = a"
+definition hide_tvar_g::"('a, 'b, 'c, 'd) baz \<Rightarrow> ('a, 'b, 'c, 'd) baz \<Rightarrow> ('a, 'b, 'c, 'd) baz" 
+     where "hide_tvar_g a b = a"
 
 assert[string_of_thm_equal,
-       thm_def="f_def", 
-       str="f (a::('a, 'b) foobar) (b::('a, 'b) foobar) = a"]
+       thm_def="hide_tvar_f_def", 
+       str="hide_tvar_f (a::('a, 'b) foobar) (b::('a, 'b) foobar) = a"]
 assert[string_of_thm_equal,
-       thm_def="g_def", 
-       str="g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
+       thm_def="hide_tvar_g_def", 
+       str="hide_tvar_g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
 
 register_default_tvars  "('alpha, 'beta) foobar" (print_all,parse)
 register_default_tvars  "('alpha, 'beta, 'gamma, 'delta) baz" (print_all,parse)
 
 update_default_tvars_mode "_ foobar" (noprint,noparse)
 assert[string_of_thm_equal,
-       thm_def="f_def",
-       str="f (a::('a, 'b) foobar) (b::('a, 'b) foobar) = a"]
+       thm_def="hide_tvar_f_def",
+       str="hide_tvar_f (a::('a, 'b) foobar) (b::('a, 'b) foobar) = a"]
 assert[string_of_thm_equal,
-       thm_def="g_def", 
-       str="g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
+       thm_def="hide_tvar_g_def", 
+       str="hide_tvar_g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
 
 update_default_tvars_mode "_ foobar" (print_all,noparse)
 
 assert[string_of_thm_equal,
-       thm_def="f_def", str="f (a::(_) foobar) (b::(_) foobar) = a"]
+       thm_def="hide_tvar_f_def", str="hide_tvar_f (a::(_) foobar) (b::(_) foobar) = a"]
 assert[string_of_thm_equal,
-       thm_def="g_def", str="g (a::(_) baz) (b::(_) baz) = a"]
+       thm_def="hide_tvar_g_def", str="hide_tvar_g (a::(_) baz) (b::(_) baz) = a"]
 
 subsection\<open>Parse Translation\<close>
 update_default_tvars_mode "_ foobar" (print_all,parse)
 
 declare [[show_types]]
-definition A :: "'x \<Rightarrow> (('x::linorder) foobar) ._"
-  where "A x = foo x"
+definition hide_tvar_A :: "'x \<Rightarrow> (('x::linorder) foobar) ._"
+  where "hide_tvar_A x = foo x"
 assert[string_of_thm_equal,
-       thm_def="A_def", str="A (x::'x) = foo x"]
+       thm_def="hide_tvar_A_def", str="hide_tvar_A (x::'x) = foo x"]
 
-definition A' :: "'x \<Rightarrow> (('x,'b) foobar) ._"
-  where "A' x = foo x"
+definition hide_tvar_A' :: "'x \<Rightarrow> (('x,'b) foobar) ._"
+  where "hide_tvar_A' x = foo x"
 assert[string_of_thm_equal,
-       thm_def="A'_def", str="A' (x::'x) = foo x"]
+       thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = foo x"]
 
-definition B' :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
-  where "B' x y = x"
+definition hide_tvar_B' :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
+  where "hide_tvar_B' x y = x"
 assert[string_of_thm_equal,
-       thm_def="A'_def", str="A' (x::'x) = foo x"]
+       thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = foo x"]
 
 
-definition B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
-  where "B x y = x"
+definition hide_tvar_B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
+  where "hide_tvar_B x y = x"
 assert[string_of_thm_equal,
-       thm_def="B_def", str="B (x::(_) foobar) (y::(_) foobar) = x"]
+       thm_def="hide_tvar_B_def", str="hide_tvar_B (x::(_) foobar) (y::(_) foobar) = x"]
 
-definition C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz" 
-  where "C x y = x"
+definition hide_tvar_C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz" 
+  where "hide_tvar_C x y = x"
 assert[string_of_thm_equal,
-       thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
+       thm_def="hide_tvar_C_def", str="hide_tvar_C (x::(_) baz) (y::(_) foobar) = x"]
 
-definition E :: "(_::linorder) baz \<Rightarrow> (_::linorder) foobar \<Rightarrow> (_::linorder) baz" 
-  where "E x y = x"
+definition hide_tvar_E :: "(_::linorder) baz \<Rightarrow> (_::linorder) foobar \<Rightarrow> (_::linorder) baz" 
+  where "hide_tvar_E x y = x"
 assert[string_of_thm_equal,
-       thm_def="C_def", str="C (x::(_) baz) (y::(_) foobar) = x"]
+       thm_def="hide_tvar_C_def", str="hide_tvar_C (x::(_) baz) (y::(_) foobar) = x"]
 
-definition X :: "(_, 'retval::linorder) baz 
+definition hide_tvar_X :: "(_, 'retval::linorder) baz 
                  \<Rightarrow> (_,'retval) foobar 
                  \<Rightarrow> (_,'retval) baz"
-  where "X x y = x"
+  where "hide_tvar_X x y = x"
 
 end
