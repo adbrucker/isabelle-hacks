@@ -421,8 +421,8 @@ subsection\<open>Register Parse Translations\<close>
 syntax "_tvars_wildcard" :: "type \<Rightarrow> type" ("'('_') _") 
 syntax "_tvars_wildcard_retval" :: "type \<Rightarrow> type \<Rightarrow> type" ("'('_, _') _")
 syntax "_tvars_wildcard_sort" :: "sort \<Rightarrow> type \<Rightarrow> type" ("'('_::_') _")
-syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_.")
-syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ .'_")
+syntax "_tvars_wildcard_right" :: "type \<Rightarrow> type" ("_ '_..")
+syntax "_tvars_wildcard_left" :: "type \<Rightarrow> type" ("_ ..'_")
 
 parse_ast_translation\<open>
   [
@@ -498,12 +498,12 @@ subsection\<open>Parse Translation\<close>
 update_default_tvars_mode "_ foobar" (print_all,parse)
 
 declare [[show_types]]
-definition hide_tvar_A :: "'x \<Rightarrow> (('x::linorder) foobar) ._"
+definition hide_tvar_A :: "'x \<Rightarrow> (('x::linorder) foobar) .._"
   where "hide_tvar_A x = foo x"
 assert[string_of_thm_equal,
        thm_def="hide_tvar_A_def", str="hide_tvar_A (x::'x) = foo x"]
 
-definition hide_tvar_A' :: "'x \<Rightarrow> (('x,'b) foobar) ._"
+definition hide_tvar_A' :: "'x \<Rightarrow> (('x,'b) foobar) .._"
   where "hide_tvar_A' x = foo x"
 assert[string_of_thm_equal,
        thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = foo x"]
