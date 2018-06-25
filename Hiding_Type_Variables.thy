@@ -43,8 +43,8 @@ text\<open>
   data types. This comes handy for complex data types with many type variables. 
   The theory sets up both configurable print and parse translations that allows 
   for replacing @{emph \<open>all\<close>} type variables by @{text  \<open>(_)\<close>}, e.g., a five-ary 
-  constructor @{text \<open>('a, 'b, 'c, 'd, 'e) foo\<close>} can be shorted to 
-  @{text \<open>(_) foo\<close>}. The use of this shorthand in output (printing) and input 
+  constructor @{text \<open>('a, 'b, 'c, 'd, 'e) hide_tvar_foo\<close>} can be shorted to 
+  @{text \<open>(_) hide_tvar_foo\<close>}. The use of this shorthand in output (printing) and input 
   (parsing) is, on a per-type basis, user-configurable using the top-level 
   commands @{text \<open>register_default_tvars\<close>} (for registering the names of the 
   default type variables and the print/parse mode) and  
@@ -55,8 +55,8 @@ text\<open>
   @{text \<open>(_::linorder)\<close>} specifies that all default variables need to be 
   instances of the sort (type class) @{class \<open>linorder\<close>} and short-hands
   of overriding a suffice (or prefix) of the default type variables. For 
-  example, @{text \<open>('state) foo _.\<close>} is a short-hand for 
-  @{text \<open>('a, 'b, 'c, 'd, 'state) foo\<close>}.
+  example, @{text \<open>('state) hide_tvar_foo _.\<close>} is a short-hand for 
+  @{text \<open>('a, 'b, 'c, 'd, 'state) hide_tvar_foo\<close>}.
 }\<close>
 
 section\<open>Implementation\<close>
@@ -461,77 +461,77 @@ ML\<open>
 
 section\<open>Examples\<close>
 subsection\<open>Print Translation\<close>
-datatype ('a, 'b) foobar = foo 'a | bar 'b 
-type_synonym ('a, 'b, 'c, 'd) baz = "('a+'b, 'a \<times> 'b) foobar"
+datatype ('a, 'b) hide_tvar_foobar = hide_tvar_foo 'a | hide_tvar_bar 'b 
+type_synonym ('a, 'b, 'c, 'd) hide_tvar_baz = "('a+'b, 'a \<times> 'b) hide_tvar_foobar"
 
-definition hide_tvar_f::"('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar \<Rightarrow> ('a, 'b) foobar" 
+definition hide_tvar_f::"('a, 'b) hide_tvar_foobar \<Rightarrow> ('a, 'b) hide_tvar_foobar \<Rightarrow> ('a, 'b) hide_tvar_foobar" 
      where "hide_tvar_f a b = a"
-definition hide_tvar_g::"('a, 'b, 'c, 'd) baz \<Rightarrow> ('a, 'b, 'c, 'd) baz \<Rightarrow> ('a, 'b, 'c, 'd) baz" 
+definition hide_tvar_g::"('a, 'b, 'c, 'd) hide_tvar_baz \<Rightarrow> ('a, 'b, 'c, 'd) hide_tvar_baz \<Rightarrow> ('a, 'b, 'c, 'd) hide_tvar_baz" 
      where "hide_tvar_g a b = a"
 
 assert[string_of_thm_equal,
        thm_def="hide_tvar_f_def", 
-       str="hide_tvar_f (a::('a, 'b) foobar) (b::('a, 'b) foobar) = a"]
+       str="hide_tvar_f (a::('a, 'b) hide_tvar_foobar) (b::('a, 'b) hide_tvar_foobar) = a"]
 assert[string_of_thm_equal,
        thm_def="hide_tvar_g_def", 
-       str="hide_tvar_g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
+       str="hide_tvar_g (a::('a + 'b, 'a \<times> 'b) hide_tvar_foobar) (b::('a + 'b, 'a \<times> 'b) hide_tvar_foobar) = a"]
 
-register_default_tvars  "('alpha, 'beta) foobar" (print_all,parse)
-register_default_tvars  "('alpha, 'beta, 'gamma, 'delta) baz" (print_all,parse)
+register_default_tvars  "('alpha, 'beta) hide_tvar_foobar" (print_all,parse)
+register_default_tvars  "('alpha, 'beta, 'gamma, 'delta) hide_tvar_baz" (print_all,parse)
 
-update_default_tvars_mode "_ foobar" (noprint,noparse)
+update_default_tvars_mode "_ hide_tvar_foobar" (noprint,noparse)
 assert[string_of_thm_equal,
        thm_def="hide_tvar_f_def",
-       str="hide_tvar_f (a::('a, 'b) foobar) (b::('a, 'b) foobar) = a"]
+       str="hide_tvar_f (a::('a, 'b) hide_tvar_foobar) (b::('a, 'b) hide_tvar_foobar) = a"]
 assert[string_of_thm_equal,
        thm_def="hide_tvar_g_def", 
-       str="hide_tvar_g (a::('a + 'b, 'a \<times> 'b) foobar) (b::('a + 'b, 'a \<times> 'b) foobar) = a"]
+       str="hide_tvar_g (a::('a + 'b, 'a \<times> 'b) hide_tvar_foobar) (b::('a + 'b, 'a \<times> 'b) hide_tvar_foobar) = a"]
 
-update_default_tvars_mode "_ foobar" (print_all,noparse)
+update_default_tvars_mode "_ hide_tvar_foobar" (print_all,noparse)
 
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_f_def", str="hide_tvar_f (a::(_) foobar) (b::(_) foobar) = a"]
+       thm_def="hide_tvar_f_def", str="hide_tvar_f (a::(_) hide_tvar_foobar) (b::(_) hide_tvar_foobar) = a"]
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_g_def", str="hide_tvar_g (a::(_) baz) (b::(_) baz) = a"]
+       thm_def="hide_tvar_g_def", str="hide_tvar_g (a::(_) hide_tvar_baz) (b::(_) hide_tvar_baz) = a"]
 
 subsection\<open>Parse Translation\<close>
-update_default_tvars_mode "_ foobar" (print_all,parse)
+update_default_tvars_mode "_ hide_tvar_foobar" (print_all,parse)
 
 declare [[show_types]]
-definition hide_tvar_A :: "'x \<Rightarrow> (('x::linorder) foobar) .._"
-  where "hide_tvar_A x = foo x"
+definition hide_tvar_A :: "'x \<Rightarrow> (('x::linorder) hide_tvar_foobar) .._"
+  where "hide_tvar_A x = hide_tvar_foo x"
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_A_def", str="hide_tvar_A (x::'x) = foo x"]
+       thm_def="hide_tvar_A_def", str="hide_tvar_A (x::'x) = hide_tvar_foo x"]
 
-definition hide_tvar_A' :: "'x \<Rightarrow> (('x,'b) foobar) .._"
-  where "hide_tvar_A' x = foo x"
+definition hide_tvar_A' :: "'x \<Rightarrow> (('x,'b) hide_tvar_foobar) .._"
+  where "hide_tvar_A' x = hide_tvar_foo x"
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = foo x"]
+       thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = hide_tvar_foo x"]
 
-definition hide_tvar_B' :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
+definition hide_tvar_B' :: "(_) hide_tvar_foobar \<Rightarrow> (_) hide_tvar_foobar \<Rightarrow> (_) hide_tvar_foobar" 
   where "hide_tvar_B' x y = x"
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = foo x"]
+       thm_def="hide_tvar_A'_def", str="hide_tvar_A' (x::'x) = hide_tvar_foo x"]
 
 
-definition hide_tvar_B :: "(_) foobar \<Rightarrow> (_) foobar \<Rightarrow> (_) foobar" 
+definition hide_tvar_B :: "(_) hide_tvar_foobar \<Rightarrow> (_) hide_tvar_foobar \<Rightarrow> (_) hide_tvar_foobar" 
   where "hide_tvar_B x y = x"
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_B_def", str="hide_tvar_B (x::(_) foobar) (y::(_) foobar) = x"]
+       thm_def="hide_tvar_B_def", str="hide_tvar_B (x::(_) hide_tvar_foobar) (y::(_) hide_tvar_foobar) = x"]
 
-definition hide_tvar_C :: "(_) baz \<Rightarrow> (_) foobar \<Rightarrow> (_) baz" 
+definition hide_tvar_C :: "(_) hide_tvar_baz \<Rightarrow> (_) hide_tvar_foobar \<Rightarrow> (_) hide_tvar_baz" 
   where "hide_tvar_C x y = x"
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_C_def", str="hide_tvar_C (x::(_) baz) (y::(_) foobar) = x"]
+       thm_def="hide_tvar_C_def", str="hide_tvar_C (x::(_) hide_tvar_baz) (y::(_) hide_tvar_foobar) = x"]
 
-definition hide_tvar_E :: "(_::linorder) baz \<Rightarrow> (_::linorder) foobar \<Rightarrow> (_::linorder) baz" 
+definition hide_tvar_E :: "(_::linorder) hide_tvar_baz \<Rightarrow> (_::linorder) hide_tvar_foobar \<Rightarrow> (_::linorder) hide_tvar_baz" 
   where "hide_tvar_E x y = x"
 assert[string_of_thm_equal,
-       thm_def="hide_tvar_C_def", str="hide_tvar_C (x::(_) baz) (y::(_) foobar) = x"]
+       thm_def="hide_tvar_C_def", str="hide_tvar_C (x::(_) hide_tvar_baz) (y::(_) hide_tvar_foobar) = x"]
 
-definition hide_tvar_X :: "(_, 'retval::linorder) baz 
-                 \<Rightarrow> (_,'retval) foobar 
-                 \<Rightarrow> (_,'retval) baz"
+definition hide_tvar_X :: "(_, 'retval::linorder) hide_tvar_baz 
+                 \<Rightarrow> (_,'retval) hide_tvar_foobar 
+                 \<Rightarrow> (_,'retval) hide_tvar_baz"
   where "hide_tvar_X x y = x"
 
 end
