@@ -399,7 +399,7 @@ structure Hide_Tvar : HIDE_TVAR = struct
                                 | _ => error("Unsupported type structure.")
         val type_vars_ast = map (fn n => Ast.Variable(name_of_tvar n)) (#tvars default_info)
         val type_vars_ast =  case hole of 
-                right => List.drop(List.rev type_vars_ast, List.length args)@args
+                right => (List.rev(List.drop(List.rev type_vars_ast, List.length args)))@args
               | left  => args@List.drop(type_vars_ast, List.length args)
       in
         Ast.Appl ((Ast.Constant decorated_name)::type_vars_ast)
