@@ -27,6 +27,7 @@ older versions might be available on a dedicated branch.
 Main author: [Achim D. Brucker](http://www.brucker.ch/)
 
 ## License
+
 If not otherwise stated, all hacks are licensed under a 2-clause 
 BSD-style license.
 
