@@ -223,14 +223,14 @@ structure String_of_thm_cmp_assert : STRING_OF_THM_CMP_ASSERT = struct
         name = "string_of_thm_equal",
         description = "Check that string representation (including types) "
                       ^"matches given string.",
-        assertion = (assert_string_of_thm_cmp_args (op =))
+        assertion = (assert_string_of_thm_cmp_args (=))
      }
 
   val string_of_thm_notequal = {
         name = "string_of_thm_notequal",
         description = "Check that string representation (including types) "
                       ^"does not match given string.",
-        assertion = (assert_string_of_thm_cmp_args (op <>))
+        assertion = (assert_string_of_thm_cmp_args (<>))
      }
 end
 \<close>

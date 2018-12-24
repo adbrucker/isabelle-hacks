@@ -42,21 +42,21 @@ text\<open>
   This theory implements a mechanism for declaring default type variables for 
   data types. This comes handy for complex data types with many type variables. 
   The theory sets up both configurable print and parse translations that allows 
-  for replacing @{emph \<open>all\<close>} type variables by @{text  \<open>(_)\<close>}, e.g., a five-ary 
-  constructor @{text \<open>('a, 'b, 'c, 'd, 'e) hide_tvar_foo\<close>} can be shorted to 
-  @{text \<open>(_) hide_tvar_foo\<close>}. The use of this shorthand in output (printing) and input 
+  for replacing @{emph \<open>all\<close>} type variables by \<open>(_)\<close>, e.g., a five-ary 
+  constructor \<open>('a, 'b, 'c, 'd, 'e) hide_tvar_foo\<close> can be shorted to 
+  \<open>(_) hide_tvar_foo\<close>. The use of this shorthand in output (printing) and input 
   (parsing) is, on a per-type basis, user-configurable using the top-level 
-  commands @{text \<open>register_default_tvars\<close>} (for registering the names of the 
+  commands \<open>register_default_tvars\<close> (for registering the names of the 
   default type variables and the print/parse mode) and  
-  @{text \<open>update_default_tvars_mode\<close>} (for changing the print/parse mode 
+  \<open>update_default_tvars_mode\<close> (for changing the print/parse mode 
   dynamically).  
 
   The input also supports short-hands for declaring default sorts (e.g., 
-  @{text \<open>(_::linorder)\<close>} specifies that all default variables need to be 
+  \<open>(_::linorder)\<close> specifies that all default variables need to be 
   instances of the sort (type class) @{class \<open>linorder\<close>} and short-hands
   of overriding a suffice (or prefix) of the default type variables. For 
-  example, @{text \<open>('state) hide_tvar_foo _.\<close>} is a short-hand for 
-  @{text \<open>('a, 'b, 'c, 'd, 'state) hide_tvar_foo\<close>}.
+  example, \<open>('state) hide_tvar_foo _.\<close> is a short-hand for 
+  \<open>('a, 'b, 'c, 'd, 'state) hide_tvar_foo\<close>.
 }\<close>
 
 section\<open>Implementation\<close>
