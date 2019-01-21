@@ -3,3 +3,4 @@ session "isabelle-hacks" = "HOL" +
   theories
     Assert
     Hiding_Type_Variables
+    Nano_JSON
