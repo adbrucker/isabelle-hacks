@@ -702,7 +702,6 @@ structure Nano_Json_Serialize_Isar = struct
     let
         val thy = Proof_Context.theory_of ctxt
         val master_dir = Resources.master_directory thy
-        val ctxt = Proof_Context.init_global thy;
         val term = Thm.concl_of (Global_Theory.get_thm thy (json_const^"_def"))
         val json_term = case term of
                              _ $ (_ $ json_term) => json_term
