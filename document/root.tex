@@ -1,0 +1,89 @@
+\documentclass[10pt,DIV16,a4paper,abstract=true,twoside=semi,openright]
+{scrreprt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Overrides the (rightfully issued) warnings by Koma Script that \rm
+%%% etc. should not be used (they are deprecated since more than a
+%%% decade)
+  \DeclareOldFontCommand{\rm}{\normalfont\rmfamily}{\mathrm}
+  \DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
+  \DeclareOldFontCommand{\tt}{\normalfont\ttfamily}{\mathtt}
+  \DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
+  \DeclareOldFontCommand{\it}{\normalfont\itshape}{\mathit}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[USenglish]{babel}
+\usepackage[numbers, sort&compress]{natbib}
+\usepackage{isabelle,isabellesym}
+\usepackage{booktabs}
+\usepackage{paralist}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstloadlanguages{HTML}
+\usepackage[]{mathtools}
+\usepackage[pdfpagelabels, pageanchor=false, plainpages=false]{hyperref}
+\lstdefinestyle{html}{language=XML,
+  basicstyle=\ttfamily,
+  commentstyle=\itshape,
+  keywordstyle=\color{blue},
+  ndkeywordstyle=\color{blue},
+}
+\lstdefinestyle{displayhtml}{style=html,
+  floatplacement={tbp},
+  captionpos=b,
+  framexleftmargin=0pt,
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{black!2},
+  frame=lines,
+}
+\lstnewenvironment{html}[1][]{\lstset{style=displayhtml, #1}}{}
+\def\inlinehtml{\lstinline[style=html, columns=fullflexible]}
+
+\pagestyle{headings}
+\isabellestyle{default}
+\setcounter{tocdepth}{1}
+\newcommand{\ie}{i.\,e.\xspace}
+\newcommand{\eg}{e.\,g.\xspace}
+\newcommand{\thy}{\isabellecontext}
+\renewcommand{\isamarkupsection}[1]{%
+  \begingroup% 
+  \def\isacharunderscore{\textunderscore}%
+  \section{#1 (\thy)}%
+  \def\isacharunderscore{-}%
+  \expandafter\label{sec:\isabellecontext}%
+  \endgroup% 
+}
+\newcommand{\isactrltype}{\\<\^type>}
+\title{Isabelle Hacks}
+\author{Achim~D.~Brucker}%
+\publishers{}
+\begin{document}
+  \maketitle
+  \begin{abstract}
+    \begin{quote}
+      This project contains small Isabelle ``hacks'' that provide additional
+      functionality to \href{https://isabelle.in.tum.de}{Isabelle} or showcase
+      specific functionality. The individual hacks usually consist out of 
+      a single theory file and all documentation is contained in that 
+      theory file. The master branch should work with the latest official 
+      release of Isabelle (Isabelle 2018, at time of writing), hacks for 
+      older versions might be available on a dedicated branch.
+
+    %\bigskip
+    %\noindent{\textbf{Keywords:}} 
+    \end{quote}
+  \end{abstract}
+
+
+\tableofcontents
+\cleardoublepage
+
+\input{session}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

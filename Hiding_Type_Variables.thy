@@ -57,7 +57,7 @@ text\<open>
   of overriding a suffice (or prefix) of the default type variables. For 
   example, \<open>('state) hide_tvar_foo _.\<close> is a short-hand for 
   \<open>('a, 'b, 'c, 'd, 'state) hide_tvar_foo\<close>.
-}\<close>
+\<close>
 
 section\<open>Implementation\<close>
 subsection\<open>Theory Managed Data Structure\<close>
