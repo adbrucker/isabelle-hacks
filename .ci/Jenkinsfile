@@ -1,0 +1,10 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'docker run -v $PWD/:/WORKING logicalhacking:isabelle2018 isabelle build -D /WORKING'
+            }
+        }
+    }
+}
