@@ -22,6 +22,9 @@ older versions might be available on a dedicated branch.
   which (sometimes) helps to focus on the important parts of complex
   type declarations.
 
+* [Nano_JSON.thy](Nano_JSON.thy) provides support for a JSON-like 
+  data exchange for Isabelle/HOL.
+
 ## Authors
 
 Main author: [Achim D. Brucker](http://www.brucker.ch/)
