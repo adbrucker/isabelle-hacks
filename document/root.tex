@@ -46,10 +46,10 @@
 \newcommand{\ie}{i.\,e.\xspace}
 \newcommand{\eg}{e.\,g.\xspace}
 \newcommand{\thy}{\isabellecontext}
-\renewcommand{\isamarkupsection}[1]{%
+\renewcommand{\isamarkupchapter}[1]{%
   \begingroup% 
   \def\isacharunderscore{\textunderscore}%
-  \section{#1 (\thy)}%
+  \chapter{#1 (\thy.thy)}%
   \def\isacharunderscore{-}%
   \expandafter\label{sec:\isabellecontext}%
   \endgroup% 
