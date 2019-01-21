@@ -37,7 +37,7 @@ imports
 keywords
       "import_JSON" :: thy_decl
   and "definition_JSON" :: thy_decl
-(*  and "serialize_JSON" :: thy_decl *)
+  and "serialize_JSON" :: thy_decl
 
 begin
 text\<open>
@@ -504,7 +504,7 @@ end
 
 subsubsection\<open>Isar Top-Level Commands\<close>
 ML\<open>
-structure Nano_Json_Isar = struct
+structure Nano_Json_Parser_Isar = struct
     fun make_const_def (constname, trm) lthy = let
             val arg = ((Binding.name constname, NoSyn), ((Binding.name (constname^"_def"),[]), trm)) 
             val ((_, (_ , thm)), lthy') = Local_Theory.define arg lthy
@@ -530,9 +530,9 @@ end
 
 ML\<open>
 val _ = Outer_Syntax.local_theory @{command_keyword "definition_JSON"} "Define JSON." 
-        (Nano_Json_Isar.jsonP >>  (fn (name, json)  => Nano_Json_Isar.def_json name json));
+        (Nano_Json_Parser_Isar.jsonP >>  (fn (name, json)  => Nano_Json_Parser_Isar.def_json name json));
 val _ = Outer_Syntax.local_theory @{command_keyword "import_JSON"} "Define JSON from file." 
-        (Nano_Json_Isar.jsonFileP >>  (fn (name, filename)  => Nano_Json_Isar.def_json_file name filename));
+        (Nano_Json_Parser_Isar.jsonFileP >>  (fn (name, filename)  => Nano_Json_Parser_Isar.def_json_file name filename));
 \<close>
 
 subsection\<open>Examples\<close>
@@ -681,13 +681,53 @@ end
 \<close>
 
 subsection\<open>Isar Setup\<close>
+ML\<open>
+structure Nano_Json_Serialize_Isar = struct
+  fun export_json ctxt json_const filename =
+    let
+        val thy = Proof_Context.theory_of ctxt
+        val master_dir = Resources.master_directory thy
+        val ctxt = Proof_Context.init_global thy;
+        val term = Thm.concl_of (Global_Theory.get_thm thy (json_const^"_def"))
+        val json_term = case term of
+                             _ $ (_ $ json_term) => json_term
+                           | _ => error ("Term structure not supported: "
+                                         ^(Sledgehammer_Util.hackish_string_of_term ctxt term))  
+        val json_string  = Nano_Json_Serializer.serialize_term_pretty json_term 
+    in
+        case filename of 
+             SOME filename => let 
+                                val filename = Path.explode filename
+                                val abs_filename = if (Path.is_absolute filename)
+                                                   then filename 
+                                                   else Path.append master_dir filename
+                              in
+                                File.write (abs_filename) json_string
+                                handle (IO.Io{name=name,...}) => warning ("Could not write \""^name^"\".") 
+                              end
+           | NONE =>  tracing json_string 
+    end
+end
+\<close>
 
-(* TODO *)
+
+ML\<open>
+  Outer_Syntax.command ("serialize_JSON", Position.none) "export JSON data to an external file"
+  (Parse.name -- Scan.option Parse.name  >> (fn (const_name,filename) =>
+    (Toplevel.keep (fn state => Nano_Json_Serialize_Isar.export_json (Toplevel.context_of state) const_name filename))));
+\<close>
+
 
 subsection\<open>Examples\<close>
+text\<open>
+  We can now serialize JSON and print the result in the output window of Isabelle/HOL:
+\<close>
+serialize_JSON example01
 
-(* TODO *)
-
+text\<open>
+  Alternatively, we can export the serialized JSON into a file:
+\<close>
+serialize_JSON example01 example01.json
 
 section\<open>Putting Everything Together\<close>
 text\<open>
