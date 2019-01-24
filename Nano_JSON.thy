@@ -39,6 +39,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 - Improved representation of IEEE reals
+- Fixed serializer for definitions using equality from Pure
 
 ## [1.0.0] - 2019-01-21
 - Initial release
@@ -706,9 +707,10 @@ structure Nano_Json_Serialize_Isar = struct
         val master_dir = Resources.master_directory thy
         val term = Thm.concl_of (Global_Theory.get_thm thy (json_const^"_def"))
         val json_term = case term of
-                             _ $ (_ $ json_term) => json_term
+                              Const (@{const_name "Pure.eq"}, _) $ _ $ json_term => json_term
+                           |  _ $ (_ $ json_term) => json_term
                            | _ => error ("Term structure not supported: "
-                                         ^(Sledgehammer_Util.hackish_string_of_term ctxt term))  
+                                         ^(Sledgehammer_Util.hackish_string_of_term ctxt term))
         val json_string  = Nano_Json_Serializer.serialize_term_pretty json_term 
     in
         case filename of 
