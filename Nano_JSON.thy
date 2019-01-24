@@ -38,6 +38,7 @@ This comment documents all notable changes to this file in a format inspired by
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Improved representation of IEEE reals
 
 ## [1.0.0] - 2019-01-21
 - Initial release
@@ -115,7 +116,7 @@ text\<open>
 subsection\<open>ML Implementation\<close>
 ML\<open>
 signature NANO_JSON_TYPE = sig
-    datatype number = INTEGER of int | REAL of real
+    datatype number = INTEGER of int | REAL of IEEEReal.decimal_approx
   
     datatype json = OBJECT of (string * json) list
                   | ARRAY of json list
@@ -128,7 +129,7 @@ signature NANO_JSON_TYPE = sig
     val json_of_term: term -> json
 end
 structure Nano_Json_Type : NANO_JSON_TYPE = struct
-    datatype number = INTEGER of int | REAL of real
+    datatype number = INTEGER of int | REAL of IEEEReal.decimal_approx
   
     datatype json = OBJECT of (string * json) list
                   | ARRAY of json list
@@ -137,9 +138,9 @@ structure Nano_Json_Type : NANO_JSON_TYPE = struct
                   | BOOL of bool
                   | NULL
 
-    fun real_to_rat_approx r = let
+    fun ieee_real_to_rat_approx rat = let
            val _ = warning ("Conversion of (real) numbers is not JSON compliant.")
-           val rat = Real.toDecimal r 
+           (* val rat = Real.toDecimal r *)
            fun pow (_, 0) = 1  
              | pow (x, n) = if n mod 2 = 0 then pow (x*x, n div 2)  
                                            else x * pow (x*x, n div 2); 
@@ -167,9 +168,10 @@ structure Nano_Json_Type : NANO_JSON_TYPE = struct
     fun mk_real_num i = HOLogic.mk_number @{typ "Real.real"} i
     fun mk_real (p,q) = if q = 1 then mk_real_num p else mk_divide (mk_real_num p) (mk_real_num q)
 
-    fun dest_real (@{const Rings.divide_class.divide (real)} $a$b) = Real.fromInt(HOLogic.dest_number a |> snd) 
-                                                                     / Real.fromInt(HOLogic.dest_number b |> snd)
-      | dest_real t = Real.fromInt (HOLogic.dest_number t |> snd)
+    fun dest_real (@{const Rings.divide_class.divide (real)} $a$b) = 
+                                      Real.toDecimal(Real.fromInt(HOLogic.dest_number a |> snd)
+                                                       / Real.fromInt(HOLogic.dest_number b |> snd))
+      | dest_real t = Real.toDecimal (Real.fromInt (HOLogic.dest_number t |> snd))
 
 
     fun term_of_json (OBJECT l) = @{const "OBJECT"}
@@ -180,7 +182,7 @@ structure Nano_Json_Type : NANO_JSON_TYPE = struct
       | term_of_json (NUMBER (INTEGER i)) = @{const "NUMBER"}
                                             $(@{const "INTEGER"}$(HOLogic.mk_number @{typ "int"} i)) 
       | term_of_json (NUMBER (REAL r)) = @{const "NUMBER"}
-                                         $(@{const "REAL"}$(mk_real (real_to_rat_approx r)))
+                                         $(@{const "REAL"}$(mk_real (ieee_real_to_rat_approx r)))
       | term_of_json (STRING s) = @{const "STRING"}$(HOLogic.mk_string s)
       | term_of_json (BOOL v) = @{const "BOOL"}$(if v then @{const "True"} else @{const "False"}) 
       | term_of_json (NULL) = @{const "NULL"} 
@@ -432,7 +434,7 @@ structure Nano_Json_Parser : NANO_JSON_PARSER = struct
                 then (case Int.fromString (String.implode digits) of
                      NONE => parse_error "Number out of range"
                    | SOME r => INTEGER r)
-                else (case Real.fromString (String.implode digits) of
+                else (case IEEEReal.fromString (String.implode digits) of
                      NONE => parse_error "Number out of range"
                    | SOME r => REAL r)
             end
@@ -677,7 +679,7 @@ structure Nano_Json_Serializer : NANO_JSON_SERIALIZER = struct
                                            (map (serialize' (n+1) ) arr) ^
                                    nl^(indent n)^"]"
               | serialize' _ (NUMBER (REAL n)) = String.implode (map (fn #"~" => #"-" | c => c)
-                                     (String.explode (Real.toString n)))
+                                     (String.explode (IEEEReal.toString n)))
               | serialize' _ (NUMBER (INTEGER n)) = String.implode (map (fn #"~" => #"-" | c => c)
                                      (String.explode (Int.toString n)))
               | serialize' _ (STRING s) = "\"" ^ escapeJsonString s ^ "\""
