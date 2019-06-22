@@ -1,5 +1,5 @@
 (***********************************************************************************
- * Copyright (c) 2018 Achim D. Brucker
+ * Copyright (c) 2018-2019 Achim D. Brucker
  *
  * All rights reserved.
  *
