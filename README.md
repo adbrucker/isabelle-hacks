@@ -25,6 +25,10 @@ older versions might be available on a dedicated branch.
 * [Nano_JSON.thy](Nano_JSON.thy) provides support for a JSON-like 
   data exchange for Isabelle/HOL.
 
+* [Code_Reflection.thy](Code_Reflection.thy) provides a new top-level 
+  command for reflecting generated SML code into Isabelle's ML 
+  environment.
+
 ## Authors
 
 Main author: [Achim D. Brucker](http://www.brucker.ch/)

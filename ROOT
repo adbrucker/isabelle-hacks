@@ -4,5 +4,6 @@ session "isabelle-hacks" = "HOL" +
     Assert
     Hiding_Type_Variables
     Nano_JSON
+    Code_Reflection
   document_files
     root.tex
