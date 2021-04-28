@@ -5,5 +5,7 @@ session "isabelle-hacks" = "HOL" +
     Hiding_Type_Variables
     Nano_JSON
     Code_Reflection
+    fxp
+    ml_yacc_lib 
   document_files
     root.tex
