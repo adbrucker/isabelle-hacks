@@ -248,5 +248,14 @@ ML_file "fxp/src/Catalog/catResolve.sml"
 ML_file "fxp/src/Catalog/catOptions.sml"
 (* end of fxp imports *)
 
+(* 
+  Todo: move configuration of the OS command for resolving URI 
+        from config.sml to a proper Isabelle/Isar configuration attribute:
+*)
+ML\<open>
+  val timeout = Attrib.setup_config_string \<^binding>\<open>uri_cmd\<close> (K "wget -qO %2 %1")
+\<close>
+
+
 end
 
