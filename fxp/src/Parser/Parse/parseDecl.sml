@@ -897,7 +897,7 @@ struct
 
    (*--------------------------------------------------------------------*)
    (* parse an attribute type, the 1st arg being the element this decl.  *)
-   (* refers to. 3.3.1:                                                  *)
+   (* Unsynchronized.refers to. 3.3.1:                                                  *)
    (*                                                                    *)
    (*   [54] AttType ::= StringType | TokenizedType | EnumeratedType     *)
    (*                                                                    *)
@@ -1026,7 +1026,7 @@ struct
 		    else 
 		       let val (cv,(av,a4)) = makeAttValue dtd (a3,q2) 
 			  (aidx,attType,false,true,text)
-		       in (AD_FIXED((lit,cv,av),(getPos q2,ref false)),(c3,a4,q3))
+		       in (AD_FIXED((lit,cv,av),(getPos q2,Unsynchronized.ref false)),(c3,a4,q3))
 		       end
 		      handle AttValue a => (AD_IMPLIED,(c3,a,q3))
 		 end
@@ -1052,13 +1052,13 @@ struct
 		      in (AD_IMPLIED,(c1,a2,q1))
 		      end
 	      else let val (cv,(av,a2)) = makeAttValue dtd (a1,q) (aidx,attType,false,true,text)
-		   in (AD_DEFAULT((lit,cv,av),(getPos q,ref false)),(c1,a2,q1))
+		   in (AD_DEFAULT((lit,cv,av),(getPos q,Unsynchronized.ref false)),(c1,a2,q1))
 		   end
 		handle AttValue a => (AD_IMPLIED,(c1,a,q1))
 	   end
 
    (*--------------------------------------------------------------------*)
-   (* parse an attribute definition, the referred element given as 1st   *)
+   (* parse an attribute definition, the Unsynchronized.referred element given as 1st   *)
    (* argument. 3.3:                                                     *)
    (*                                                                    *)
    (*   [53]      AttDef ::= S Name S AttType S DefaultDecl              *)

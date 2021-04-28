@@ -99,21 +99,21 @@ functor SymTable (structure Key : Key) : SymTable =
       (* - an integer count holding the next free index                     *)
       (*--------------------------------------------------------------------*)
       type SymTable = {desc    : string,
-		       tab     : Key array ref,
-		       hash    : Bucket array ref,
-		       hashFun : (Key -> int) ref,
-		       width   : int ref, (* bit width *)
-		       size    : int ref, (* tab size=2^width, hash size is double *) 
-		       count   : int ref  (* number of entries *)
+		       tab     : Key array Unsynchronized.ref,
+		       hash    : Bucket array Unsynchronized.ref,
+		       hashFun : (Key -> int) Unsynchronized.ref,
+		       width   : int Unsynchronized.ref, (* bit width *)
+		       size    : int Unsynchronized.ref, (* tab size=2^width, hash size is double *) 
+		       count   : int Unsynchronized.ref  (* number of entries *)
 		       }
 
       fun nullSymTable desc = {desc    = desc,
-			       tab     = ref (Array.array(1,Key.null)),
-			       hash    = ref (Array.array(2,nullBucket)),
-			       hashFun = ref (fn _ => 0),
-			       count   = ref 0,
-			       size    = ref 1,
-			       width   = ref 0} : SymTable
+			       tab     = Unsynchronized.ref (Array.array(1,Key.null)),
+			       hash    = Unsynchronized.ref (Array.array(2,nullBucket)),
+			       hashFun = Unsynchronized.ref (fn _ => 0),
+			       count   = Unsynchronized.ref 0,
+			       size    = Unsynchronized.ref 1,
+			       width   = Unsynchronized.ref 0} : SymTable
 
       (*--------------------------------------------------------------------*)
       (* how many entries are in the symtable?                              *)
@@ -158,12 +158,12 @@ functor SymTable (structure Key : Key) : SymTable =
 	    val width= Int.min(Int.max(1,w),MAX_WIDTH)
 	    val size = Word.toInt(Word.<<(0w1,Word.fromInt(width-1)))
 	 in {desc    = desc,
-	     tab     = ref (Array.array(size,Key.null)),
-	     hash    = ref (Array.array(2*size,nullBucket)),
-	     hashFun = ref (makeHashFun(size,width)),
-	     width   = ref width,
-	     size    = ref size,
-	     count   = ref 0}
+	     tab     = Unsynchronized.ref (Array.array(size,Key.null)),
+	     hash    = Unsynchronized.ref (Array.array(2*size,nullBucket)),
+	     hashFun = Unsynchronized.ref (makeHashFun(size,width)),
+	     width   = Unsynchronized.ref width,
+	     size    = Unsynchronized.ref size,
+	     count   = Unsynchronized.ref 0}
 	 end
       
       (*--------------------------------------------------------------------*)
@@ -173,7 +173,7 @@ functor SymTable (structure Key : Key) : SymTable =
 	 case widthOpt 
 	   of NONE => 
 	      let 
-		 val {tab=ref tab,hash=ref hash,size,count,...} = symTab
+		 val {tab=Unsynchronized.ref tab,hash=Unsynchronized.ref hash,size,count,...} = symTab
 		 val _ = appInterval (fn i => Array.update(tab,i,Key.null)) (0,!count-1)
 		 val _ = appInterval (fn i => Array.update(hash,i,nullBucket)) (0,!size*2-1)
 	      in 
@@ -276,7 +276,7 @@ functor SymTable (structure Key : Key) : SymTable =
       (*--------------------------------------------------------------------*)
       (* reserve an index for a (yet unknown) key.                          *) 
       (*--------------------------------------------------------------------*)
-      fun reserveSymIndex(st as {size,count=count as ref i,...}:SymTable) = 
+      fun reserveSymIndex(st as {size,count=count as Unsynchronized.ref i,...}:SymTable) = 
 	 let 
 	    val _ = if !size>i then () else growTable st
 	    val _ = count := i+1

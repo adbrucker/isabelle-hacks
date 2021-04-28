@@ -68,9 +68,9 @@ structure BaseData =
 	 AD_IMPLIED
        | AD_REQUIRED
        | AD_DEFAULT of (UniChar.Vector * UniChar.Vector * AttValue option) 
-	 * (Errors.Position * bool ref)
+	 * (Errors.Position * bool Unsynchronized.ref)
        | AD_FIXED of (UniChar.Vector * UniChar.Vector * AttValue option) 
-	 * (Errors.Position * bool ref)
+	 * (Errors.Position * bool Unsynchronized.ref)
 	  
       (*--- attribute definition (list) ---*)
       (*--- the boolean says whether it was externally declared ---*) 
@@ -103,7 +103,7 @@ structure BaseData =
 
       (*--------------------------------------------------------------------*)
       (* the id info tells whether an id value has occurred for a name and  *)
-      (* the list of all positions where it occurred as an idref value.     *)
+      (* the list of all positions where it occurred as an idUnsynchronized.ref value.     *)
       (*--------------------------------------------------------------------*)
       type IdInfo = bool * Errors.Position list
       val nullIdInfo : IdInfo = (false,nil)

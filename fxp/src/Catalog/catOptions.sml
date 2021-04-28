@@ -1,11 +1,11 @@
 signature CatOptions =
    sig
-      val O_CATALOG_FILES  : Uri.Uri list ref
-      val O_PREFER_SOCAT   : bool ref
-      val O_PREFER_SYSID   : bool ref
-      val O_PREFER_CATALOG : bool ref
-      val O_SUPPORT_REMAP  : bool ref
-      val O_CATALOG_ENC    : Encoding.Encoding ref
+      val O_CATALOG_FILES  : Uri.Uri list Unsynchronized.ref
+      val O_PREFER_SOCAT   : bool Unsynchronized.ref
+      val O_PREFER_SYSID   : bool Unsynchronized.ref
+      val O_PREFER_CATALOG : bool Unsynchronized.ref
+      val O_SUPPORT_REMAP  : bool Unsynchronized.ref
+      val O_CATALOG_ENC    : Encoding.Encoding Unsynchronized.ref
 	 
       val setCatalogDefaults : unit -> unit
       val setCatalogOptions  : Options.Option list * (string -> unit) -> Options.Option list
@@ -17,12 +17,12 @@ functor CatOptions () : CatOptions =
    struct
       open Encoding Options Uri 
 
-      val O_CATALOG_FILES  = ref nil: Uri list ref
-      val O_PREFER_SOCAT   = ref false
-      val O_PREFER_SYSID   = ref false
-      val O_PREFER_CATALOG = ref true
-      val O_SUPPORT_REMAP  = ref true
-      val O_CATALOG_ENC    = ref LATIN1
+      val O_CATALOG_FILES  = Unsynchronized.ref nil: Uri list Unsynchronized.ref
+      val O_PREFER_SOCAT   = Unsynchronized.ref false
+      val O_PREFER_SYSID   = Unsynchronized.ref false
+      val O_PREFER_CATALOG = Unsynchronized.ref true
+      val O_SUPPORT_REMAP  = Unsynchronized.ref true
+      val O_CATALOG_ENC    = Unsynchronized.ref LATIN1
 
       fun setCatalogDefaults() = 
 	 let 
@@ -45,7 +45,7 @@ functor CatOptions () : CatOptions =
 
       fun setCatalogOptions (opts,doError) = 
 	 let 
-	    val catalogs = ref nil:string list ref
+	    val catalogs = Unsynchronized.ref nil:string list Unsynchronized.ref
 
 	    fun hasNoArg key = "option "^key^" has no argument"
 	    fun mustHave key = String.concat ["option ",key," must have an argument"]

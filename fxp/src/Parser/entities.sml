@@ -46,7 +46,7 @@
 (*                                                                          *)
 (*   The characters #x85 and #x2028 cannot be reliably recognized and       *)
 (*   translated until an entity's encoding declaration (if present) has     *)
-(*   been read. Therefore, it is a fatal error to use them within the XML   *)
+(*   been read. TheUnsynchronized.refore, it is a fatal error to use them within the XML   *)
 (*   declaration or text declaration.                                       *)
 (****************************************************************************)
 (*                                                                          *)
@@ -86,7 +86,7 @@ signature Entities =
 
       val getChar     : AppData * State -> UniChar.Char * AppData * State
       val getChar11   : AppData * State -> UniChar.Char * AppData * State
-      val getCharRef     : (AppData * State -> UniChar.Char * AppData * State) ref
+      val getCharRef     : (AppData * State -> UniChar.Char * AppData * State) Unsynchronized.ref
       val ungetChars  : State * UniChar.Data -> State
  
       val isOpen      : int * bool * State -> bool
@@ -489,7 +489,7 @@ functor Entities (structure Hooks : Hooks) : Entities =
 			     else 
 			       if c<0wx7F orelse c>0wx9F then (c,a,EXT1(dec1,l,col+1,false,typ))
 			       else (* in XML 1.1 the control characters 0wx7F through 0wx9F must appear
-				     only as chracter references *)
+				     only as chracter Unsynchronized.references *)
 				 let 
 				   val a1 = hookError(a,(getPos q,ERR_MUST_CHARREF c))
 				 in 
@@ -530,7 +530,7 @@ functor Entities (structure Hooks : Hooks) : Entities =
 			     else 
 			       if c<0wx7F orelse c>0wx9F then (c,a,EXT2(arr,s,i+1,l,col+1,false,det))
 			       else (* in XML 1.1 the control characters 0wx7F through 0wx9F must appear
-				     only as chracter references *)
+				     only as chracter Unsynchronized.references *)
 				 let 
 				   val a1 = hookError(a,(getPos q,ERR_MUST_CHARREF c))
 				 in 
@@ -557,7 +557,7 @@ functor Entities (structure Hooks : Hooks) : Entities =
             | LOOKED(nil,q) => getChar11(a,q)
             | LOOKED(c::cs,q) => (c,a,LOOKED(cs,q))
 
-      val getCharRef = ref getChar
+      val getCharRef = Unsynchronized.ref getChar
 
       fun getChar x = !getCharRef x
 

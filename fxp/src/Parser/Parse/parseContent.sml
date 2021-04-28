@@ -232,7 +232,7 @@ struct
    (*   appear in their literal form only when used as markup delimiters,*)
    (*   or within a comment, a processing instruction, or a CDATA        *)
    (*   section... If they are needed elsewhere, they must be escaped    *)
-   (*   using either numeric character references or the strings "&amp;" *)
+   (*   using either numeric character Unsynchronized.references or the strings "&amp;" *)
    (*   and "&lt;" respectively...                                       *)
    (*                                                                    *)
    (* consume the content of the element, accumulating it via the user   *)
@@ -319,19 +319,19 @@ struct
 		    end
 	    end
 	 (*--------------------------------------------------------------*)
-	 (* consume a reference, handling errors by ignoring them.       *)
+	 (* consume a Unsynchronized.reference, handling errors by ignoring them.       *)
 	 (*--------------------------------------------------------------*)
 	 fun do_ref (q,(c1,a1,q1)) = 
 	    if c1=0wx23 (* #"#" *)
 	       (*------------------------------------------------------*)
-	       (* it's a character reference.                          *)
+	       (* it's a character Unsynchronized.reference.                          *)
 	       (*------------------------------------------------------*)
 	       then let val err = ERR_ELEM_CONTENT IT_CHAR_REF
 		        val a2 = hookError(a1,(getPos q,err))
 		    in skipCharRef(a2,q1)
 		    end
 	    (*---------------------------------------------------------*)
-	    (* it's a general entity reference.                        *)
+	    (* it's a general entity Unsynchronized.reference.                        *)
 	    (*---------------------------------------------------------*)
 	    else let val ((id,ent),(a2,q2)) = parseGenRef dtd (c1,a1,q1)
 		 in case ent
@@ -368,7 +368,7 @@ struct
 				  "parseGenRef returned GE_UNPARSED")
 		 end
 	     (*-------------------------------------------------------*)
-	     (* handle any errors in references by ignoring them.     *)
+	     (* handle any errors in Unsynchronized.references by ignoring them.     *)
 	     (*-------------------------------------------------------*)
 	  handle SyntaxError caq => caq
 	       | NoSuchEntity aq => getChar aq
@@ -552,10 +552,10 @@ struct
    (*   appear in their literal form only when used as markup delimiters,*)
    (*   or within a comment, a processing instruction, or a CDATA        *)
    (*   section... If they are needed elsewhere, they must be escaped    *)
-   (*   using either numeric character references or the strings "&amp;" *)
+   (*   using either numeric character Unsynchronized.references or the strings "&amp;" *)
    (*   and "&lt;" respectively. The right angle bracket (>) may be      *)
    (*   represented using the string "&gt;", and must, for compatibility,*)
-   (*   be escaped using "&gt;" or a character reference when it appears *)
+   (*   be escaped using "&gt;" or a character Unsynchronized.reference when it appears *)
    (*   in the string "]]>" in content, when that string is not marking  *)
    (*   the end of a CDATA section.                                      *)
    (*                                                                    *)
@@ -583,7 +583,7 @@ struct
 	 (*--------------------------------------------------------------*)
 	 fun do_data (br,(c0,a0,q0)) =
 	    let 
-	       val pos0 = ref (getPos q0)
+	       val pos0 = Unsynchronized.ref (getPos q0)
 	       val _ = Array.update(dataBuffer,0,c0)
 
 	       fun data_hook (i,(a,q)) = 
@@ -663,12 +663,12 @@ struct
 	 *)
 
 	 (*--------------------------------------------------------------*)
-	 (* consume a reference, handling errors by ignoring them.       *)
+	 (* consume a Unsynchronized.reference, handling errors by ignoring them.       *)
 	 (*--------------------------------------------------------------*)
 	 fun do_ref (q0,(c,a,q)) = 
 	    if c=0wx23 (* #"#" *)
 	       (*------------------------------------------------------*)
-	       (* it's a character reference.                          *)
+	       (* it's a character Unsynchronized.reference.                          *)
 	       (*------------------------------------------------------*)
 	       then let val (cs,(ch,a1,q1)) = parseCharRefLit [0wx23,0wx26] (a,q)
 			val cv = Data2Vector(rev cs)
@@ -678,7 +678,7 @@ struct
 		 handle SyntaxError caq => caq
 		      | NoSuchChar aq => getChar aq 
 	    (*---------------------------------------------------------*)
-	    (* it's a general entity reference.                        *)
+	    (* it's a general entity Unsynchronized.reference.                        *)
 	    (*---------------------------------------------------------*)
 	    else let val ((id,ent),(a1,q1)) = parseGenRef dtd (c,a,q)
 		 in case ent
@@ -715,7 +715,7 @@ struct
 				  "parseGenRef returned GE_UNPARSED")
 		 end
 	     (*-------------------------------------------------------*)
-	     (* handle any errors in references by ignoring them.     *)
+	     (* handle any errors in Unsynchronized.references by ignoring them.     *)
 	     (*-------------------------------------------------------*)
 	  handle SyntaxError caq => caq
 	       | NoSuchEntity aq => getChar aq 

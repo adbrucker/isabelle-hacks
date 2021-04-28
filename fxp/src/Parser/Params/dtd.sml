@@ -111,11 +111,11 @@ structure Dtd : Dtd =
 	 Base UniChar
 	 DataDict DataSymTab
 	 
-      val O_TS_ELEM    = ref 6 (* Initial size of element table             *)
-      val O_TS_GEN_ENT = ref 6 (* Initial size of general entity table      *)
-      val O_TS_ID      = ref 6 (* Initial size of id attribute table        *)
-      val O_TS_ATT_NOT = ref 6 (* Initial size of notation table            *)
-      val O_TS_PAR_ENT = ref 6 (* Initial size of parameter entity table    *)
+      val O_TS_ELEM    = Unsynchronized.ref 6 (* Initial size of element table             *)
+      val O_TS_GEN_ENT = Unsynchronized.ref 6 (* Initial size of general entity table      *)
+      val O_TS_ID      = Unsynchronized.ref 6 (* Initial size of id attribute table        *)
+      val O_TS_ATT_NOT = Unsynchronized.ref 6 (* Initial size of notation table            *)
+      val O_TS_PAR_ENT = Unsynchronized.ref 6 (* Initial size of parameter entity table    *)
 
       (*--------------------------------------------------------------------*)
       (* this is how the predefined entities must be declared.              *)
@@ -133,9 +133,9 @@ structure Dtd : Dtd =
       (*--------------------------------------------------------------------*)
       (* this type holds all information relevent to the DTD.               *)
       (*--------------------------------------------------------------------*)
-      type Dtd = {hasDtdFlag     : bool ref,
-		  standAloneFlag : bool ref,
-		  externalFlag   : bool ref,
+      type Dtd = {hasDtdFlag     : bool Unsynchronized.ref,
+		  standAloneFlag : bool Unsynchronized.ref,
+		  externalFlag   : bool Unsynchronized.ref,
 		  elDict         : ElemInfo DataDict.Dict,
 		  genDict        : GenEntInfo DataDict.Dict,
 		  idDict         : IdInfo DataDict.Dict,
@@ -144,9 +144,9 @@ structure Dtd : Dtd =
 		  preRedef       : bool array
 		  }
 
-      fun newDtd() = {hasDtdFlag     = ref false,
-		      standAloneFlag = ref false,
-		      externalFlag   = ref false,
+      fun newDtd() = {hasDtdFlag     = Unsynchronized.ref false,
+		      standAloneFlag = Unsynchronized.ref false,
+		      externalFlag   = Unsynchronized.ref false,
 		      elDict         = nullDict ("element",nullElemInfo),
 		      idDict         = nullDict ("ID name",nullIdInfo),
 		      genDict        = nullDict ("general entity",(GE_NULL,false)),
@@ -163,7 +163,7 @@ structure Dtd : Dtd =
       (*--------------------------------------------------------------------*)
       (* standalone status, existance of a DTD and of external declarations *)
       (* externalFlag is true if there is an external subset or a (not nece-*)
-      (* ssarily external) parameter entity reference in the DTD. (cf. 4.1) *)
+      (* ssarily external) parameter entity Unsynchronized.reference in the DTD. (cf. 4.1) *)
       (*--------------------------------------------------------------------*)
       fun standsAlone (dtd:Dtd) = !(#standAloneFlag dtd)
       fun hasExternal (dtd:Dtd) = !(#externalFlag dtd)
@@ -178,16 +178,16 @@ structure Dtd : Dtd =
       (* 4.1:                                                               *)
       (*   Well-Formedness Constraint: Entity Declared                      *)
       (*   In a document without any DTD, a document with only an internal  *)
-      (*   DTD subset which contains no parameter entity references, or a   *)
+      (*   DTD subset which contains no parameter entity Unsynchronized.references, or a   *)
       (*   document with "standalone='yes'", the Name given in the entity   *)
-      (*   reference must match that in an entity declaration ... Note that *)
+      (*   Unsynchronized.reference must match that in an entity declaration ... Note that *)
       (*   if entities are declared in the external subset or in external   *)
       (*   parameter entities, a non-validating processor is not obligated  *)
       (*   to read and process their declarations; for such documents, the  *)
       (*   rule that an entity must be declared is a well-formedness        *)
       (*   constraint only if standalone='yes'.                             *)
       (*                                                                    *)
-      (* Thus a reference to an undeclared entity is a well-formedness      *)
+      (* Thus a Unsynchronized.reference to an undeclared entity is a well-formedness      *)
       (* error if either #hasDtdFlag or #externalFlag is false, or if       *)
       (* #standaloneFlag is true                                            *)
       (*--------------------------------------------------------------------*)

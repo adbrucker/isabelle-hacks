@@ -108,21 +108,21 @@ functor Dict (structure Key : Key) : Dict =
       (* - a default value for the value table                              *)
       (*--------------------------------------------------------------------*)
       type 'a Dict = {desc    : string,
-                      tab     : (Key * 'a) array ref,
-                      hashTab : Bucket array ref,
-                      hashFun : (Key -> int) ref,
-                      width   : int ref,  (* bit width *)
-                      size    : int ref,  (* tab size=2^width, hash size is double *) 
-                      count   : int ref,  (* number of entries *)
+                      tab     : (Key * 'a) array Unsynchronized.ref,
+                      hashTab : Bucket array Unsynchronized.ref,
+                      hashFun : (Key -> int) Unsynchronized.ref,
+                      width   : int Unsynchronized.ref,  (* bit width *)
+                      size    : int Unsynchronized.ref,  (* tab size=2^width, hash size is double *) 
+                      count   : int Unsynchronized.ref,  (* number of entries *)
                       def     : 'a        (* default for values *)
                       }
       fun nullDict (desc,def) = {desc    = desc,
-                                 tab     = ref (Array.array(1,(Key.null,def))),
-                                 hashTab = ref (Array.array(2,nullBucket)),
-                                 hashFun = ref (fn _ => 0),
-                                 count   = ref 0,
-                                 size    = ref 1,
-                                 width   = ref 0,
+                                 tab     = Unsynchronized.ref (Array.array(1,(Key.null,def))),
+                                 hashTab = Unsynchronized.ref (Array.array(2,nullBucket)),
+                                 hashFun = Unsynchronized.ref (fn _ => 0),
+                                 count   = Unsynchronized.ref 0,
+                                 size    = Unsynchronized.ref 1,
+                                 width   = Unsynchronized.ref 0,
                                  def     = def}
 
       (*--------------------------------------------------------------------*)
@@ -168,12 +168,12 @@ functor Dict (structure Key : Key) : Dict =
             val width= Int.min(Int.max(1,w),MAX_WIDTH)
             val size = Word.toInt(Word.<<(0w1,Word.fromInt(width-1)))
          in {desc    = desc,
-             tab     = ref (Array.array(size,(Key.null,def))),
-             hashTab = ref (Array.array(2*size,nullBucket)),
-             hashFun = ref (makeHashFun(size,width)),
-             width   = ref width,
-             size    = ref size,
-             count   = ref 0,
+             tab     = Unsynchronized.ref (Array.array(size,(Key.null,def))),
+             hashTab = Unsynchronized.ref (Array.array(2*size,nullBucket)),
+             hashFun = Unsynchronized.ref (makeHashFun(size,width)),
+             width   = Unsynchronized.ref width,
+             size    = Unsynchronized.ref size,
+             count   = Unsynchronized.ref 0,
              def     = def}
          end
       
@@ -184,7 +184,7 @@ functor Dict (structure Key : Key) : Dict =
 	 case widthOpt 
 	   of NONE => 
 	      let 
-		 val {tab=ref tab,hashTab=ref hashTab,size,count,def,...} = dict
+		 val {tab=Unsynchronized.ref tab,hashTab=Unsynchronized.ref hashTab,size,count,def,...} = dict
 		 val _ = appInterval (fn i => Array.update(tab,i,(Key.null,def))) (0,!count-1)
 		 val _ = appInterval (fn i => Array.update(hashTab,i,nullBucket)) (0,!size*2-1)
 	      in 

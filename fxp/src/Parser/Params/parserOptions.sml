@@ -7,30 +7,30 @@ signature ParserOptions =
    sig
       structure DfaOptions : DfaOptions
 
-      val O_CHECK_ISO639        : bool ref
-      val O_CHECK_LANGID        : bool ref
-      val O_CHECK_PREDEFINED    : bool ref
-      val O_CHECK_RESERVED      : bool ref
-      val O_CHECK_VERSION       : bool ref
+      val O_CHECK_ISO639        : bool Unsynchronized.ref
+      val O_CHECK_LANGID        : bool Unsynchronized.ref
+      val O_CHECK_PREDEFINED    : bool Unsynchronized.ref
+      val O_CHECK_RESERVED      : bool Unsynchronized.ref
+      val O_CHECK_VERSION       : bool Unsynchronized.ref
 
-      val O_WARN_MULT_ENUM      : bool ref
-      val O_WARN_XML_DECL       : bool ref
-      val O_WARN_ATT_NO_ELEM    : bool ref
-      val O_WARN_MULT_ENT_DECL  : bool ref
-      val O_WARN_MULT_NOT_DECL  : bool ref
-      val O_WARN_MULT_ATT_DEF   : bool ref
-      val O_WARN_MULT_ATT_DECL  : bool ref
-      val O_WARN_SHOULD_DECLARE : bool ref
-      val O_WARN_NON_ASCII_URI  : bool ref
+      val O_WARN_MULT_ENUM      : bool Unsynchronized.ref
+      val O_WARN_XML_DECL       : bool Unsynchronized.ref
+      val O_WARN_ATT_NO_ELEM    : bool Unsynchronized.ref
+      val O_WARN_MULT_ENT_DECL  : bool Unsynchronized.ref
+      val O_WARN_MULT_NOT_DECL  : bool Unsynchronized.ref
+      val O_WARN_MULT_ATT_DEF   : bool Unsynchronized.ref
+      val O_WARN_MULT_ATT_DECL  : bool Unsynchronized.ref
+      val O_WARN_SHOULD_DECLARE : bool Unsynchronized.ref
+      val O_WARN_NON_ASCII_URI  : bool Unsynchronized.ref
 
-      val O_ERROR_MINIMIZE      : bool ref
+      val O_ERROR_MINIMIZE      : bool Unsynchronized.ref
 
-      val O_VALIDATE            : bool ref
-      val O_COMPATIBILITY       : bool ref
-      val O_INTEROPERABILITY    : bool ref
+      val O_VALIDATE            : bool Unsynchronized.ref
+      val O_COMPATIBILITY       : bool Unsynchronized.ref
+      val O_INTEROPERABILITY    : bool Unsynchronized.ref
 
-      val O_INCLUDE_EXT_PARSED  : bool ref
-      val O_INCLUDE_PARAM_ENTS  : bool ref
+      val O_INCLUDE_EXT_PARSED  : bool Unsynchronized.ref
+      val O_INCLUDE_PARAM_ENTS  : bool Unsynchronized.ref
 
       val setParserDefaults     : unit -> unit
       val setParserOptions      : Options.Option list * (string -> unit) -> Options.Option list
@@ -44,41 +44,41 @@ functor ParserOptions () : ParserOptions =
 
       open DfaOptions Options UtilInt UtilList 
 
-      val O_CHECK_VERSION = ref true (* check for conforming xml version?   *)
-      val O_CHECK_ISO639 = ref true (* check whether a two-letter LangCode  *)
+      val O_CHECK_VERSION = Unsynchronized.ref true (* check for conforming xml version?   *)
+      val O_CHECK_ISO639 = Unsynchronized.ref true (* check whether a two-letter LangCode  *)
 	                            (* is acording to ISO 639?              *)
-      val O_CHECK_LANGID = ref true (* check whether a LangCode fullfills   *)
+      val O_CHECK_LANGID = Unsynchronized.ref true (* check whether a LangCode fullfills   *)
 	                            (* IETF RFC 1766?                       *)
-      val O_CHECK_RESERVED = ref false(* check for names starting with xml? *)
-      val O_CHECK_PREDEFINED = ref true (* check declarations of predefined *)
-      val O_WARN_MULT_ENUM = ref true  (* check whether a token occurs      *)
+      val O_CHECK_RESERVED = Unsynchronized.ref false(* check for names starting with xml? *)
+      val O_CHECK_PREDEFINED = Unsynchronized.ref true (* check declarations of predefined *)
+      val O_WARN_MULT_ENUM = Unsynchronized.ref true  (* check whether a token occurs      *)
 	                               (* twice in the enumerated attribute *)
                                        (* types of the same element         *)
-      val O_WARN_XML_DECL = ref false (* warn if the XML decl is missing?   *)
+      val O_WARN_XML_DECL = Unsynchronized.ref false (* warn if the XML decl is missing?   *)
 
-      val O_WARN_ATT_NO_ELEM   = ref true (* warn for undeclared elements   *)
+      val O_WARN_ATT_NO_ELEM   = Unsynchronized.ref true (* warn for undeclared elements   *)
 	                                  (* in att def list declarations?  *)
 
-      val O_WARN_MULT_ENT_DECL  = ref true (* warn about redefined entities *)
-      val O_WARN_MULT_NOT_DECL  = ref true (* warn about redefined notations*)
-      val O_WARN_SHOULD_DECLARE = ref true (* warn if predefined entities   *)
+      val O_WARN_MULT_ENT_DECL  = Unsynchronized.ref true (* warn about redefined entities *)
+      val O_WARN_MULT_NOT_DECL  = Unsynchronized.ref true (* warn about redefined notations*)
+      val O_WARN_SHOULD_DECLARE = Unsynchronized.ref true (* warn if predefined entities   *)
 	                                   (* are not declared in the dtd   *)
 
-      val O_WARN_MULT_ATT_DEF  = ref true (* warn if an attributes is defd  *)
+      val O_WARN_MULT_ATT_DEF  = Unsynchronized.ref true (* warn if an attributes is defd  *)
 	                                  (* twice for the same element?    *) 
-      val O_WARN_MULT_ATT_DECL = ref true (* warn if there are multiple att *)
+      val O_WARN_MULT_ATT_DECL = Unsynchronized.ref true (* warn if there are multiple att *)
 	                                  (* def lists for one element?     *)
-      val O_WARN_NON_ASCII_URI = ref true (* warn about non-ascii chars in  *)
+      val O_WARN_NON_ASCII_URI = Unsynchronized.ref true (* warn about non-ascii chars in  *)
 	                                  (* system identifiers?            *)
 
-      val O_ERROR_MINIMIZE  = ref true (* try to avoid repeating errors?    *)
+      val O_ERROR_MINIMIZE  = Unsynchronized.ref true (* try to avoid repeating errors?    *)
 
-      val O_VALIDATE         = ref true 
-      val O_COMPATIBILITY    = ref true
-      val O_INTEROPERABILITY = ref false
+      val O_VALIDATE         = Unsynchronized.ref true 
+      val O_COMPATIBILITY    = Unsynchronized.ref true
+      val O_INTEROPERABILITY = Unsynchronized.ref false
 
-      val O_INCLUDE_EXT_PARSED = ref false
-      val O_INCLUDE_PARAM_ENTS = ref false
+      val O_INCLUDE_EXT_PARSED = Unsynchronized.ref false
+      val O_INCLUDE_PARAM_ENTS = Unsynchronized.ref false
 
       fun setParserDefaults() = 
 	 let 

@@ -55,12 +55,14 @@ structure ErrorString : ErrorString =
       fun errorVector2String vec = 
 	 errorData2String (Vector.foldr (op ::) nil vec)
       
-      val QUOTE = "'"
-      fun quoteErrorChar0 c = QUOTE^errorChar2String c^QUOTE
-      fun quoteErrorChar c = if c=0wx0 then "entity end" else QUOTE^errorChar2String c^QUOTE
-      fun quoteErrorData cs = QUOTE^errorData2String cs^QUOTE
-      fun quoteErrorString s = QUOTE^s^QUOTE
-      fun quoteErrorVector v = QUOTE^errorVector2String v^QUOTE
+
+      (* val QUOTE = "'" *)
+
+      fun quoteErrorChar0 c = ("'"^(errorChar2String c)^"'")
+      fun quoteErrorChar c = if c=0wx0 then "entity end" else "'"^(errorChar2String c)^"'"
+      fun quoteErrorData cs = "'"^(errorData2String cs)^"'"
+      fun quoteErrorString s = "'"^s^"'"
+      fun quoteErrorVector v = "'"^(errorVector2String v)^"'"
 
       fun Position2String (fname,l,c) = 
 	 if fname="" then "" 

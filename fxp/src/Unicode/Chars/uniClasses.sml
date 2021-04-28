@@ -30,13 +30,13 @@ signature UniClasses =
    sig
       val isName    : UniChar.Char -> bool
       val isName11  : UniChar.Char -> bool
-      val isNameRef : (UniChar.Char -> bool) ref
+      val isNameRef : (UniChar.Char -> bool) Unsynchronized.ref
       val isNms     : UniChar.Char -> bool
       val isNms11   : UniChar.Char -> bool
-      val isNmsRef  : (UniChar.Char -> bool) ref
+      val isNmsRef  : (UniChar.Char -> bool) Unsynchronized.ref
       val isXml     : UniChar.Char -> bool 
       val isXml11   : UniChar.Char -> bool 
-      val isXmlRef  : (UniChar.Char -> bool) ref
+      val isXmlRef  : (UniChar.Char -> bool) Unsynchronized.ref
       val isPubid   : UniChar.Char -> bool
       val isS       : UniChar.Char -> bool
       val isEnc     : UniChar.Char -> bool
@@ -112,7 +112,7 @@ structure UniClasses : UniClasses =
       fun isNms11 c = if c<=0wxFFFF then inCharClass(c,nms11Class) 
 		      else c>=0wx10000 andalso c<=0wxEFFFF
 
-      val isNmsRef = ref isNms
+      val isNmsRef = Unsynchronized.ref isNms
 
       fun isNms x = (!isNmsRef) x
 	
@@ -129,7 +129,7 @@ structure UniClasses : UniClasses =
       fun isName11 c = if c<=0wxFFFF then inCharClass(c,name11Class) 
 		      else c>=0wx10000 andalso c<=0wxEFFFF
 
-      val isNameRef = ref isName
+      val isNameRef = Unsynchronized.ref isName
 
       fun isName x = (!isNameRef) x
 
@@ -150,7 +150,7 @@ structure UniClasses : UniClasses =
 	 c>=0wxE000 andalso c<=0wxFFFD orelse
 	 c>=0wx10000 andalso c<=0wx10FFFF
 
-      val isXmlRef = ref isXml
+      val isXmlRef = Unsynchronized.ref isXml
 
       fun isXml x = (!isXmlRef) x
 

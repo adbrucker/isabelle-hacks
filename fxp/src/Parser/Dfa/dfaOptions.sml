@@ -1,8 +1,8 @@
 signature DfaOptions = 
    sig
-      val O_DFA_INITIAL_WIDTH  : int ref
-      val O_DFA_MAX_STATES     : int ref
-      val O_DFA_WARN_TOO_LARGE : bool ref
+      val O_DFA_INITIAL_WIDTH  : int Unsynchronized.ref
+      val O_DFA_MAX_STATES     : int Unsynchronized.ref
+      val O_DFA_WARN_TOO_LARGE : bool Unsynchronized.ref
 			   
       val setDfaDefaults : unit -> unit
       val setDfaOptions  : Options.Option list * (string -> unit) -> Options.Option list
@@ -14,9 +14,9 @@ functor DfaOptions () : DfaOptions =
    struct
       open Options UtilInt
 
-      val O_DFA_INITIAL_WIDTH  = ref 4 
-      val O_DFA_MAX_STATES     = ref 256
-      val O_DFA_WARN_TOO_LARGE = ref true
+      val O_DFA_INITIAL_WIDTH  = Unsynchronized.ref 4 
+      val O_DFA_MAX_STATES     = Unsynchronized.ref 256
+      val O_DFA_WARN_TOO_LARGE = Unsynchronized.ref true
 
       fun setDfaDefaults() = 
 	 let 
