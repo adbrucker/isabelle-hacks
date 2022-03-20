@@ -5,7 +5,7 @@ functionality to [Isabelle](https://isabelle.in.tum.de) or showcase
 specific functionality. The individual hacks usually consist out of 
 a single theory file and all documentation is contained in that 
 theory file. The master branch should work with the latest official 
-release of Isabelle (Isabelle 2021, at time of writing), hacks for 
+release of Isabelle (Isabelle 2021-1, at time of writing), hacks for 
 older versions might be available on a dedicated branch.
 
 ## List of Isabelle Hacks
