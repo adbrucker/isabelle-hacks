@@ -2,7 +2,7 @@ pipeline:
   build:
     image: docker.io/logicalhacking/isabelle2021
     commands:
-      - export ARTIFACT_DIR=$CI_WORKSPACE/.artifacts/$CI_REPO_NAME/$CI_BRANCH/$CI_BUILD_NUMBER/
+      - export ARTIFACT_DIR=$CI_WORKSPACE/.artifacts/$CI_REPO/$CI_BRANCH/$CI_BUILD_NUMBER/
       - mkdir -p $ARTIFACT_DIR
       - export `isabelle getenv ISABELLE_HOME_USER`
       - isabelle build -D . -o browser_info
@@ -16,8 +16,8 @@ pipeline:
     settings:
       hosts: [ "ci.logicalhacking.com"]
       port: 22
-      source: .artifacts/$CI_REPO_NAME/*
-      target: $CI_REPO_NAME
+      source: .artifacts/$CI_REPO/*
+      target: $CI_REPO
       include: [ "**.*"]
       key:
         from_secret: artifacts_ssh
