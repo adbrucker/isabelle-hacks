@@ -10,5 +10,5 @@ It may also contain additional tools and script that are useful for preparing a 
 ### Latest Build
 
 * [document.pdf](https://artifacts.logicalhacking.com/ci/adbrucker/isabelle-hacks/main/latest/document.pdf)
-* [browser_info](https://artifacts.logicalhacking.com/ci/adbrucker/isabelle-hacks/main/latest/browser_info/Unsorted/)
+* [browser_info](https://artifacts.logicalhacking.com/ci/adbrucker/isabelle-hacks/main/latest/browser_info/Unsorted/isabelle-hacks/)
 * [aux files](https://artifacts.logicalhacking.com/ci/adbrucker/isabelle-hacks/main/latest/)
