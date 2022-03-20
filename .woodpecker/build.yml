@@ -16,8 +16,8 @@ pipeline:
     settings:
       hosts: [ "ci.logicalhacking.com"]
       port: 22
-      source: .artifacts/$CI_REPO/*
-      target: $CI_REPO
+      source: .artifacts/$CI_REPO_OWNER/*
+      target: $CI_REPO_OWNER
       include: [ "**.*"]
       key:
         from_secret: artifacts_ssh
