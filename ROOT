@@ -7,5 +7,6 @@ session "isabelle-hacks" = "HOL" +
     Code_Reflection
     fxp
     ml_yacc_lib 
+    Simple_Oracle
   document_files
     root.tex

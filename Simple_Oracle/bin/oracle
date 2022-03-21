@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Welcome to Simple Oracle 0.0"
+echo "Ignoring counter examples since 1842"
+echo ""
+echo "Analyzing '$(<$1)' ..."
+sleep 1
+result=$(($RANDOM % 2))
+if [[ "$result" -eq 1 ]]; then
+    echo "Counter example found ..."
+else
+    echo "Inconclusive ..."
+fi
+exit

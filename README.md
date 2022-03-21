@@ -35,6 +35,19 @@ older versions might be available on a dedicated branch.
 * [fxp.thy](fxp.thy) provides Isabelle support for The Functional XML
   Parser (fxp).
 
+* [Simple_Oracle.thy](Simple_Oracle.thy) provides an example on integrating 
+  an external tool as simple oracle or counter example generator, similar
+  to the built-in quickcheck.
+
+## Authors
+
+Main author: [Achim D. Brucker](http://www.brucker.ch/)
+
+## License
+
+If not otherwise stated, all hacks are licensed under a 2-clause 
+BSD-style license.
+
 ## Authors
 
 Main author: [Achim D. Brucker](http://www.brucker.ch/)
