@@ -59,8 +59,8 @@ BSD-style license.
 
 SPDX-License-Identifier: BSD-2-Clause
 
-## Master Repository
+## Upstream Repository
 
-The master git repository for this project is hosted by the [Software
-Assurance & Security Research Team](https://logicalhacking.com) at
+The upstream git repository, i.e., the single source of truth, for this project is hosted 
+by the [Software Assurance & Security Research Team](https://logicalhacking.com) at
 <https://git.logicalhacking.com/adbrucker/isabelle-hacks>.
