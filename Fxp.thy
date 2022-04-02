@@ -44,7 +44,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ***********************************************************************************)
 
 chapter\<open>The Functional XML Parser for Isabelle\<close>
-theory fxp
+theory Fxp
   imports Main 
 begin 
 

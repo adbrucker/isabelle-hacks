@@ -45,7 +45,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 chapter\<open>ML Yacc Library for Isabelle\<close>
 theory
-  "ml_yacc_lib"
+  "Ml_Yacc_Lib"
   imports
   Main
 begin
