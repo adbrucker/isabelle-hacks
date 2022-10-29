@@ -6,7 +6,6 @@ session "isabelle-hacks" = "HOL" +
     Fxp
     Hiding_Type_Variables
     Ml_Yacc_Lib 
-    Nano_JSON
     Simple_Oracle
   document_files
     root.tex
