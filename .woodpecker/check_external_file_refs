@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 
@@ -24,7 +24,7 @@ REGEXP=$DIRREGEXP
 DIR=$DIRMATCH
 failed=0
 for i in $(seq 1 10); do 
-  FILES=`find * -mindepth $((i-1)) -maxdepth $i -type f | xargs`
+  FILES=`find * -mindepth $((i-1)) -maxdepth $i -type f -not -name "*.diff" | xargs`
   if [ -n "$FILES" ]; then 
     grep -s ${REGEXP} ${FILES}
     exit=$?
