@@ -28,7 +28,7 @@
  * Dependencies: None
  ***********************************************************************************)
 
-chapter\<open>Code Reflection for \<close>
+chapter\<open>Code Reflection for Isabelle\<close>
 theory
   "Code_Reflection"
 imports 
