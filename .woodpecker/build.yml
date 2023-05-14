@@ -9,6 +9,7 @@ pipeline:
       - mkdir -p $ARTIFACT_DIR
       - export `isabelle getenv ISABELLE_HOME_USER`
       - isabelle build -D . -o browser_info
+      - isabelle scala .woodpecker/profiling.scala  --sort e isabelle-hacks
       - cp -r $ISABELLE_HOME_USER/browser_info $ARTIFACT_DIR
       - cp output/document.pdf $ARTIFACT_DIR
       - cd $ARTIFACT_DIR
